@@ -1,0 +1,44 @@
+extern type basevar
+extern type release_flag
+extern var toInt : token -> int
+extern var BaseVer : (int, int, int) -> basevar
+extern var Alpha : release_flag
+extern var Beta : release_flag
+extern var C : release_flag
+extern var RC : release_flag
+extern var Preview : release_flag
+
+LINE_END = "\n" | "\r";
+DIGIT = [0-9];
+INT = DIGIT+ ;
+FLT = DIGIT* ("." INT)? ;
+EXP = "-"? FLT (("e" | "E") INT)?;
+STR = "\"" ( "\\" _ | ! "\"" )* "\"" ;
+SPACE = ("\t" | "\n" | "\r" | " ")+;
+LINE_COMMENT = "-" "-" (!LINE_END)*;
+ID_CHAR = ([a-z] | [A-Z] | "_" | [\u4e00-\u9fa5]);
+ID = ID_CHAR (ID_CHAR | [0-9] | "-")*;
+
+ignore SPACE
+
+epoch : INT { toInt($1) }
+
+
+base_version : INT         { BaseVer(toInt($1), 0, 0) }
+             | INT "." INT { BaseVer(toInt($1), toInt($2), 0) }
+             | INT "." INT "." INT
+                           { BaseVer(toInt($1), toInt($2), toInt($3)) }
+
+pre : "a" { Alpha }
+    | "alpha" { Alpha }
+    | "b" { Beta }
+    | "c" { C }
+    | "rc" { RC }
+    | "pre" { Preview }
+    | "preview" { Preview }
+
+sep : "-" { 0 }  
+    | "." { 0 } 
+
+post : "post" 
+version : "v" base_version sep

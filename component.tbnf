@@ -1,0 +1,90 @@
+extern type num
+extern type array<'a>
+extern type version
+extern type specifier
+
+extern var unesc: str -> str
+extern var lexeme: token -> str
+extern var toNum: str -> num
+extern var add: <'a>(list<'a>, 'a) -> list<'a>
+extern var toArray: list<'a> -> array<'a>
+
+extern type operator
+extern var EQ : operator
+extern var NE : operator
+extern var GT : operator
+extern var LT : operator
+extern var GE : operator
+extern var LE : operator
+extern var PATCH : operator
+extern var COMPACT : operator
+
+extern type Component
+extern var CNull : Component
+extern var CNum : num -> Component
+extern var CStr : str -> Component
+extern var CBool : bool -> Component
+extern var CVer : version -> Component
+extern var CSpec : list<specifier> -> Component
+extern var CCons : (str, list<Component>) -> Component
+extern var CList : list<Component> -> Component
+extern var CCommented : (list<str>, Component) -> Component
+extern var parse_version : str -> version
+extern var mk_specifier : (operator, version) -> specifier
+
+extern var one_or_list : list<Component> -> Component
+
+LINE_END = "\n" | "\r";
+DIGIT = [0-9];
+INT = DIGIT+ ;
+FLT = DIGIT* ("." INT)? ;
+EXP = "-"? FLT (("e" | "E") INT)?;
+STR = "\"" ( "\\" _ | ! "\"" )* "\"" ;
+SPACE = ("\t" | "\n" | "\r" | " ")+;
+LINE_COMMENT = "-" "-" (!LINE_END)*;
+ID_CHAR = ([a-z] | [A-Z] | "_" | [\u4e00-\u9fa5]);
+ID = ID_CHAR (ID_CHAR | [0-9] | "-")*;
+VERSION = "v" INT ("." INT ("." INT)?)?;
+
+ignore  SPACE
+
+start : component { $1 }
+list(a) : a { [$1] }
+        | list(a) a { add($1, $2) }
+
+
+
+op       : "==" { EQ }
+         | "!=" { NE }
+         | ">"  { GT }
+         | "<"  { LT }
+         | ">=" { GE }
+         | "<=" { LE }
+         | "~"  { PATCH }
+         | "^"  { COMPACT }
+
+version : <VERSION> { parse_version(lexeme($1)) }
+specifier : op version { mk_specifier($1, $2) }
+specifier_set : specifier { [$1] }
+              | specifier_set "&&" specifier { add($1, $3) }
+                
+comment : <LINE_COMMENT> { lexeme($1) }
+
+comp      : <EXP>      { CNum(toNum(lexeme($1))) }
+          | <STR>      { CStr(unesc(lexeme($1))) }
+          | "true"     { CBool(true) }
+          | "false"    { CBool(false) }
+          | "null"     { CNull }
+          | version    { CVer($1) }
+          | specifier_set { CSpec($1) } 
+          | <ID> component  { CCons(lexeme($1), [$2]) }
+          | <ID> "{" list(component) "}"
+                            { CCons(lexeme($1), $3) }
+          | <ID> "{"  "}"   { CCons(lexeme($1), []) }
+          | "[" list(component) "]"
+                            { CList($2) }
+          | "[" "]"         { CList([]) }
+
+
+component  : comp               { $1 }
+           | list(comment) comp { CCommented($1, $2) }
