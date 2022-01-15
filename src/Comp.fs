@@ -223,7 +223,7 @@ module Array =
     let tryFindIndices (f: 'a -> bool) (xs: 'a array) =
         let res = ResizeArray<int>()
         xs
-        |> Array.iteri (fun i x -> 
+        |> Array.iteri (fun i x ->
                 if f x then
                     ignore(res.Add(i))
                 else ())
@@ -277,7 +277,7 @@ let (|NotCList|IsCList|) x =
 
 let inline checkGenericType<'f> (t: System.Type) =
     t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<'f>
-    
+
 (* avoid 'commented' *)
 let rec realTypeName (t: System.Type) =
     if checkGenericType<commented<_>> t then realTypeName t.GenericTypeArguments.[0]
@@ -293,15 +293,15 @@ and extractFieldArguments (tname: string) (finfo: System.Reflection.PropertyInfo
         Array.tryFindIndex  (fun f ->
             f.Name = AllowUnused_Field
             && typeof<unused_components> = f.PropertyType)
-    
+
     let lifted_fields =
         finfo |>
         Array.tryFindIndices  (fun f ->
             checkGenericType<lift_array<_>> f.PropertyType)
-    
+
     for i in lifted_fields do
         arguments.[i] <- create_lift_array(ResizeArray())
-    
+
     let finfo =
         finfo
         |> Array.map(fun f ->
@@ -322,11 +322,11 @@ and extractFieldArguments (tname: string) (finfo: System.Reflection.PropertyInfo
             let (fname, ftype) = finfo.[i]
             let is_lifted = lifted_fields.Contains i
             match each with
-            | CCons(fname', _) | CCommented(_, CCons(fname', _)) 
+            | CCons(fname', _) | CCommented(_, CCons(fname', _))
               when is_lifted && fname' = fname ->
                 let o = objFromComp ftype each
                 unbox<lift_array<_>>(arguments.[i]).elements.Add(o)
-                break' <- true                
+                break' <- true
             | CCommented(comments, CCons(fname', [|fvalue|])) when fname' = fname ->
                 let o = objFromComp ftype (CCommented(comments, fvalue))
                 arguments.[i] <- o
@@ -356,11 +356,11 @@ and extractFieldArguments (tname: string) (finfo: System.Reflection.PropertyInfo
                 col.Add(each)
             | None ->
                 raise <| FromCompinentError $"{tname} received invalid {each.kind}"
-    
+
     for i = 0 to finfo.Length - 1 do
         let fname, ftype = finfo.[i]
         if arguments.[i] = null then
-            if isOptionType ftype then 
+            if isOptionType ftype then
                 arguments.[i] <- None
             else
                 raise <| FromCompinentError $"{tname} expects a field {fname}: {ftype.Name}"
@@ -407,7 +407,7 @@ and objFromComp (t: System.Type) (data: Component) =
         | NotCList -> raise <| FromCompinentError $"convert {data.kind} to {t}"
         | IsCList seq ->
         // integers
-        
+
         if eltype == typeof<int> then
             Array.init seq.Length (fun i -> int (numFromComp seq.[i]))
             |> box
@@ -457,19 +457,19 @@ and objFromComp (t: System.Type) (data: Component) =
         else
             Array.init seq.Length (fun i -> objFromComp eltype seq.[i])
             |> box
-            
+
     elif isOptionType t then
         let eltype = t.GenericTypeArguments.[0]
         match data with
         | CNull -> box <| None
         | _ -> box <| Some (objFromComp eltype data)
-    
+
     elif t = typeof<version> then
         match data with
         | CVer v -> box <| v
         | _ -> raise <| FromCompinentError $"convert {data.kind} to {t}"
-    
-    elif checkGenericType<list<_>> t then 
+
+    elif checkGenericType<list<_>> t then
         let eltype = t.GenericTypeArguments.[0]
         match data with
         | CSpec spec when eltype = typeof<specifier> -> box <| List.ofArray spec
@@ -482,7 +482,7 @@ and objFromComp (t: System.Type) (data: Component) =
 
     elif checkGenericType<lift_array<_>> t then
         raise <| FromCompinentError "lift_array is not allowed outside fields"
-     
+
     elif FSharpType.IsRecord t then
         let tname = t.Name
 
@@ -512,7 +512,7 @@ and objFromComp (t: System.Type) (data: Component) =
             | CCons(cname', elements) -> cname', elements
             | _ -> raise <| FromCompinentError $"convert {data.kind} to {t}"
         let cname' = cname'.ToLowerInvariant()
-        match 
+        match
             FSharpType.GetUnionCases t
             |> Array.tryFind (fun case -> case.Name.ToLowerInvariant() = cname')
         with
@@ -634,7 +634,7 @@ let rec objToComp (t: System.Type) (o: obj) =
     then
         let eltype = t.GenericTypeArguments.[0]
         match unbox<commented<obj>> o with
-        | Commented(comments, v) -> 
+        | Commented(comments, v) ->
             CCommented(comments, objToComp eltype v)
 
     elif t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<list<_>> then
@@ -650,7 +650,7 @@ let rec objToComp (t: System.Type) (o: obj) =
             |> CList
     elif checkGenericType<lift_array<_>> t then
         raise <| ToComponentError "lift_array is not allowed outside fields"
-    
+
     elif FSharpType.IsRecord t then
         let fields = [|
             for fi in FSharpType.GetRecordFields t do
@@ -658,7 +658,7 @@ let rec objToComp (t: System.Type) (o: obj) =
                     let eltype = fi.PropertyType.GenericTypeArguments.[0]
                     let f = unbox<lift_array<obj>>
                             <| (FSharpValue.GetRecordField(o, fi))
-                    for elt in f.elements do 
+                    for elt in f.elements do
                         yield objToComp eltype elt
                 else
                     let f = objToComp fi.PropertyType (FSharpValue.GetRecordField(o, fi))
@@ -679,7 +679,7 @@ let rec objToComp (t: System.Type) (o: obj) =
                 if checkGenericType<lift_array<_>> fi.PropertyType then
                     let eltype = fi.PropertyType.GenericTypeArguments.[0]
                     let f' = unbox<lift_array<obj>> f
-                    for elt in f'.elements do 
+                    for elt in f'.elements do
                         yield objToComp eltype elt
                 else
                     let f' = objToComp fi.PropertyType f
@@ -697,8 +697,8 @@ let space2 = Breakable (seg "  ")
 let rec serializeComp : Component -> Doc = fun x ->
     match x with
     | CVer v -> seg <| string v
-    | CSpec specs -> 
-        specs 
+    | CSpec specs ->
+        specs
         |> Array.map (fun x -> x.Show)
         |> Array.map seg
         |> separray (seg " && ")

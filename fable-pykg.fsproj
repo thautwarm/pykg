@@ -12,7 +12,6 @@
     <Compile Include="src/PrettyDoc.fs" />
     <Compile Include="src/Comp.fs" />
     <Compile Include="src/Proj.fs" />
-    <Compile Include="src/Web.fs" />
     <Compile Include="src/Z3.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
