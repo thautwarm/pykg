@@ -30,7 +30,7 @@ AllowOmit_Version : str = "version"
 
 AllowUnused_Field : str = "_unused"
 
-def expr_82() -> TypeInfo:
+def expr_83() -> TypeInfo:
     return class_type("FablePykg.Comp.ParseComponentError", None, ParseComponentError, class_type("System.Exception"))
 
 
@@ -40,7 +40,7 @@ class ParseComponentError(FSharpException):
         self.Data0 = Data0
     
 
-ParseComponentError_reflection = expr_82
+ParseComponentError_reflection = expr_83
 
 def ParseComponentError__Equals_229D3F39(this: Exception, obj: Exception) -> bool:
     if not equals(this, None):
@@ -64,7 +64,7 @@ def ParseComponentError__Equals_229D3F39(this: Exception, obj: Exception) -> boo
     
 
 
-def expr_83() -> TypeInfo:
+def expr_84() -> TypeInfo:
     return class_type("FablePykg.Comp.FromCompinentError", None, FromCompinentError, class_type("System.Exception"))
 
 
@@ -74,7 +74,7 @@ class FromCompinentError(FSharpException):
         self.Data0 = Data0
     
 
-FromCompinentError_reflection = expr_83
+FromCompinentError_reflection = expr_84
 
 def FromCompinentError__Equals_229D3F39(this: Exception, obj: Exception) -> bool:
     if not equals(this, None):
@@ -98,7 +98,7 @@ def FromCompinentError__Equals_229D3F39(this: Exception, obj: Exception) -> bool
     
 
 
-def expr_84() -> TypeInfo:
+def expr_85() -> TypeInfo:
     return class_type("FablePykg.Comp.ToComponentError", None, ToComponentError, class_type("System.Exception"))
 
 
@@ -108,7 +108,7 @@ class ToComponentError(FSharpException):
         self.Data0 = Data0
     
 
-ToComponentError_reflection = expr_84
+ToComponentError_reflection = expr_85
 
 def ToComponentError__Equals_229D3F39(this: Exception, obj: Exception) -> bool:
     if not equals(this, None):
@@ -132,7 +132,7 @@ def ToComponentError__Equals_229D3F39(this: Exception, obj: Exception) -> bool:
     
 
 
-def expr_85() -> TypeInfo:
+def expr_86() -> TypeInfo:
     return union_type("FablePykg.Comp.operator", [], operator, lambda: [[], [], [], [], [], [], [], []])
 
 
@@ -147,7 +147,7 @@ class operator(Union):
         return ["EQ", "NE", "GT", "GE", "LT", "LE", "COMPACT", "PATCH"]
     
 
-operator_reflection = expr_85
+operator_reflection = expr_86
 
 def operator__get_Show(this: operator) -> str:
     if this.tag == 1:
@@ -192,7 +192,7 @@ COMPACT : operator = operator(6)
 
 PATCH : operator = operator(7)
 
-def expr_86(gen0: TypeInfo) -> TypeInfo:
+def expr_87(gen0: TypeInfo) -> TypeInfo:
     return record_type("FablePykg.Comp.lift_array`1", [gen0], lift_array_1, lambda: [["elements", array_type(gen0)]])
 
 
@@ -202,13 +202,13 @@ class lift_array_1(Record, Generic[_A]):
         self.elements = elements
     
 
-lift_array_1_reflection = expr_86
+lift_array_1_reflection = expr_87
 
 def create_lift_array(x: List[_A]) -> lift_array_1[_A]:
     return lift_array_1(x)
 
 
-def expr_87(gen0: TypeInfo) -> TypeInfo:
+def expr_88(gen0: TypeInfo) -> TypeInfo:
     return union_type("FablePykg.Comp.commented`1", [gen0], commented_1, lambda: [[["comments", array_type(string_type)], ["value", gen0]]])
 
 
@@ -223,7 +223,7 @@ class commented_1(Union, Generic[_A]):
         return ["Commented"]
     
 
-commented_1_reflection = expr_87
+commented_1_reflection = expr_88
 
 def commented_1__get_uncomment(self_1: commented_1[_A]) -> _A:
     return self_1.fields[1]
@@ -237,7 +237,7 @@ def mk_version(major: int, minor: int, micro: int) -> Version:
     return Version(major, minor, micro)
 
 
-def expr_88() -> TypeInfo:
+def expr_89() -> TypeInfo:
     return record_type("FablePykg.Comp.specifier", [], specifier, lambda: [["op", operator_reflection()], ["version", class_type("FablePykg.Comp.version")]])
 
 
@@ -252,7 +252,7 @@ class specifier(Record):
         return specifier__get_Show(this)
     
 
-specifier_reflection = expr_88
+specifier_reflection = expr_89
 
 def specifier__get_Show(spec: specifier) -> str:
     return to_text(interpolate("%P() %P()", [operator__get_Show(spec.op), spec.version]))
@@ -262,7 +262,7 @@ def mk_specifier(op: operator, v: Version) -> specifier:
     return specifier(op, v)
 
 
-def expr_89() -> TypeInfo:
+def expr_90() -> TypeInfo:
     return union_type("FablePykg.Comp.Component", [], Component, lambda: [[], [["Item", class_type("System.Decimal")]], [["Item", string_type]], [["Item", bool_type]], [["Item1", string_type], ["Item2", array_type(Component_reflection())]], [["elements", array_type(Component_reflection())]], [["Item", class_type("FablePykg.Comp.version")]], [["Item", array_type(specifier_reflection())]], [["comments", array_type(string_type)], ["Item2", Component_reflection()]]])
 
 
@@ -277,7 +277,7 @@ class Component(Union):
         return ["CNull", "CNum", "CStr", "CBool", "CCons", "CList", "CVer", "CSpec", "CCommented"]
     
 
-Component_reflection = expr_89
+Component_reflection = expr_90
 
 def Component__get_kind(this: Component) -> str:
     if this.tag == 2:
@@ -366,11 +366,11 @@ def unesc(s: str) -> str:
 def escape_string(s: str) -> str:
     buf : Any = StringBuilder__ctor_Z524259A4(len(s))
     for i in range(0, (len(s) - 1) + 1, 1):
-        def arrow_90(s: str=s) -> Any:
+        def arrow_91(s: str=s) -> Any:
             c : str = s[i]
             return StringBuilder__Append_Z721C83C5(buf, "\\b") if (c == "\b") else (StringBuilder__Append_Z721C83C5(buf, "\\t") if (c == "\t") else (StringBuilder__Append_Z721C83C5(buf, "\\n") if (c == "\n") else (StringBuilder__Append_Z721C83C5(buf, "\\f") if (c == "\f") else (StringBuilder__Append_Z721C83C5(buf, "\\r") if (c == "\r") else (StringBuilder__Append_Z721C83C5(buf, "\\\"") if (c == "\"") else (StringBuilder__Append_Z721C83C5(buf, "\\\\") if (c == "\\") else (StringBuilder__Append_244C7CD6(buf, c))))))))
         
-        ignore(arrow_90())
+        ignore(arrow_91())
     return to_string(buf)
 
 
@@ -402,25 +402,25 @@ def CList(d: List[Component]) -> Component:
 def parse_version(s: str) -> Version:
     s_1 : str = s[1:(len(s) - 1) + 1]
     match_value : List[str] = split(s_1, ["."], None, 0)
-    def arrow_91(x: str, y: str, s: str=s) -> bool:
+    def arrow_92(x: str, y: str, s: str=s) -> bool:
         return x == y
     
-    if len(match_value) == 1 if (not equals_with(arrow_91, match_value, None)) else (False):
+    if len(match_value) == 1 if (not equals_with(arrow_92, match_value, None)) else (False):
         return mk_version(parse(match_value[0], 511, False, 32), 0, 0)
     
     else: 
-        def arrow_92(x_1: str, y_1: str, s: str=s) -> bool:
+        def arrow_93(x_1: str, y_1: str, s: str=s) -> bool:
             return x_1 == y_1
         
-        if len(match_value) == 2 if (not equals_with(arrow_92, match_value, None)) else (False):
+        if len(match_value) == 2 if (not equals_with(arrow_93, match_value, None)) else (False):
             minor : str = match_value[1]
             return mk_version(parse(match_value[0], 511, False, 32), parse(minor, 511, False, 32), 0)
         
         else: 
-            def arrow_93(x_2: str, y_2: str, s: str=s) -> bool:
+            def arrow_94(x_2: str, y_2: str, s: str=s) -> bool:
                 return x_2 == y_2
             
-            if len(match_value) == 3 if (not equals_with(arrow_93, match_value, None)) else (False):
+            if len(match_value) == 3 if (not equals_with(arrow_94, match_value, None)) else (False):
                 minor_1 : str = match_value[1]
                 micro : str = match_value[2]
                 return mk_version(parse(match_value[0], 511, False, 32), parse(minor_1, 511, False, 32), parse(micro, 511, False, 32))
@@ -469,7 +469,7 @@ def _007CCase_007C__007C(s: str, v: Component) -> Optional[List[Component]]:
     
 
 
-def expr_94(gen0: TypeInfo) -> TypeInfo:
+def expr_95(gen0: TypeInfo) -> TypeInfo:
     return record_type("FablePykg.Comp.Picker`1", [gen0], Picker_1, lambda: [["require", string_type], ["picker", lambda_type(Component_reflection(), option_type(gen0))]])
 
 
@@ -480,26 +480,26 @@ class Picker_1(Record, Generic[_A]):
         self.picker = picker
     
 
-Picker_1_reflection = expr_94
+Picker_1_reflection = expr_95
 
 def Array_pickOne() -> Callable[[Callable[[__A], Optional[__B]], List[__A]], __B]:
-    def arrow_96(chooser: Callable[[__A], Optional[__B]]) -> Callable[[List[__A]], __B]:
-        def arrow_95(array: List[__A]) -> Any:
+    def arrow_97(chooser: Callable[[__A], Optional[__B]]) -> Callable[[List[__A]], __B]:
+        def arrow_96(array: List[__A]) -> Any:
             return pick(chooser, array)
         
-        return arrow_95
+        return arrow_96
     
-    return arrow_96
+    return arrow_97
 
 
 def Array_tryPickOne() -> Callable[[Callable[[__A], Optional[__B]], List[__A]], Optional[__B]]:
-    def arrow_98(chooser: Callable[[__A], Optional[__B]]) -> Callable[[List[__A]], Optional[__B]]:
-        def arrow_97(array: List[__A]) -> Optional[__B]:
+    def arrow_99(chooser: Callable[[__A], Optional[__B]]) -> Callable[[List[__A]], Optional[__B]]:
+        def arrow_98(array: List[__A]) -> Optional[__B]:
             return try_pick(chooser, array)
         
-        return arrow_97
+        return arrow_98
     
-    return arrow_98
+    return arrow_99
 
 
 def Array_pickAll(f: Callable[[_A], Optional[_B]], xs: List[_A]) -> List[_B]:
@@ -584,7 +584,7 @@ def is_option_type(t: Any) -> bool:
     
 
 
-def expr_99(gen0: TypeInfo) -> TypeInfo:
+def expr_100(gen0: TypeInfo) -> TypeInfo:
     return union_type("FablePykg.Comp.evidence`1", [gen0], evidence_1, lambda: [[]])
 
 
@@ -599,7 +599,7 @@ class evidence_1(Union, Generic[_A]):
         return ["Evidence"]
     
 
-evidence_1_reflection = expr_99
+evidence_1_reflection = expr_100
 
 def _007CNotCList_007CIsCList_007C(x: Component) -> Any:
     if x.tag == 5:
@@ -613,11 +613,11 @@ def _007CNotCList_007CIsCList_007C(x: Component) -> Any:
 def real_type_name(t_mut: Any) -> str:
     while True:
         (t,) = (t_mut,)
-        def arrow_100(t: Any=t) -> bool:
+        def arrow_101(t: Any=t) -> bool:
             t_1 : Any = t
             return equals_1(get_generic_type_definition(t_1), commented_1_reflection(obj_type)) if (is_generic_type(t_1)) else (False)
         
-        if arrow_100():
+        if arrow_101():
             t_mut = get_generics(t)[0]
             continue
         
@@ -658,11 +658,11 @@ def extract_field_arguments(tname: str, finfo: List[Any], elements: List[Compone
         dispose(enumerator)
     
     def mapping(f_3: Any, tname: str=tname, finfo: List[Any]=finfo, elements: List[Component]=elements) -> Tuple[str, Any]:
-        def arrow_101(f_3: Any=f_3) -> bool:
+        def arrow_102(f_3: Any=f_3) -> bool:
             t_1 : Any = f_3[1]
             return equals_1(get_generic_type_definition(t_1), lift_array_1_reflection(obj_type)) if (is_generic_type(t_1)) else (False)
         
-        if arrow_101():
+        if arrow_102():
             inner_t : Any = get_generics(f_3[1])[0]
             return (real_type_name(inner_t), inner_t)
         
@@ -718,19 +718,19 @@ def extract_field_arguments(tname: str, finfo: List[Any], elements: List[Compone
                 (pattern_matching_result_1, comments_1, fname_0027_4, fvalue_1) = (None, None, None, None)
                 if each.tag == 8:
                     if each.fields[1].tag == 4:
-                        def arrow_106(tname: str=tname, finfo: List[Any]=finfo, elements: List[Component]=elements) -> bool:
+                        def arrow_107(tname: str=tname, finfo: List[Any]=finfo, elements: List[Component]=elements) -> bool:
                             test_expr : List[Component] = each.fields[1].fields[1]
-                            def arrow_105(x: Component, y: Component) -> bool:
+                            def arrow_106(x: Component, y: Component) -> bool:
                                 return equals(x, y)
                             
-                            return len(test_expr) == 1 if (not equals_with(arrow_105, test_expr, None)) else (False)
+                            return len(test_expr) == 1 if (not equals_with(arrow_106, test_expr, None)) else (False)
                         
-                        if arrow_106():
-                            def arrow_107(tname: str=tname, finfo: List[Any]=finfo, elements: List[Component]=elements) -> bool:
+                        if arrow_107():
+                            def arrow_108(tname: str=tname, finfo: List[Any]=finfo, elements: List[Component]=elements) -> bool:
                                 fvalue : Component = each.fields[1].fields[1][0]
                                 return each.fields[1].fields[0] == fname
                             
-                            if arrow_107():
+                            if arrow_108():
                                 pattern_matching_result_1 = 0
                                 comments_1 = each.fields[0]
                                 fname_0027_4 = each.fields[1].fields[0]
@@ -759,19 +759,19 @@ def extract_field_arguments(tname: str, finfo: List[Any], elements: List[Compone
                 elif pattern_matching_result_1 == 1:
                     (pattern_matching_result_2, fname_0027_6, fvalue_3) = (None, None, None)
                     if each.tag == 4:
-                        def arrow_103(tname: str=tname, finfo: List[Any]=finfo, elements: List[Component]=elements) -> bool:
+                        def arrow_104(tname: str=tname, finfo: List[Any]=finfo, elements: List[Component]=elements) -> bool:
                             test_expr_1 : List[Component] = each.fields[1]
-                            def arrow_102(x_1: Component, y_1: Component) -> bool:
+                            def arrow_103(x_1: Component, y_1: Component) -> bool:
                                 return equals(x_1, y_1)
                             
-                            return len(test_expr_1) == 1 if (not equals_with(arrow_102, test_expr_1, None)) else (False)
+                            return len(test_expr_1) == 1 if (not equals_with(arrow_103, test_expr_1, None)) else (False)
                         
-                        if arrow_103():
-                            def arrow_104(tname: str=tname, finfo: List[Any]=finfo, elements: List[Component]=elements) -> bool:
+                        if arrow_104():
+                            def arrow_105(tname: str=tname, finfo: List[Any]=finfo, elements: List[Component]=elements) -> bool:
                                 fvalue_2 : Component = each.fields[1][0]
                                 return each.fields[0] == fname
                             
-                            if arrow_104():
+                            if arrow_105():
                                 pattern_matching_result_2 = 0
                                 fname_0027_6 = each.fields[0]
                                 fvalue_3 = each.fields[1][0]
@@ -924,11 +924,11 @@ def extract_field_arguments(tname: str, finfo: List[Any], elements: List[Compone
 
 
 def obj_from_comp(t: Any, data: Component) -> Any:
-    def arrow_108(t: Any=t, data: Component=data) -> bool:
+    def arrow_109(t: Any=t, data: Component=data) -> bool:
         t_1 : Any = t
         return equals_1(get_generic_type_definition(t_1), commented_1_reflection(obj_type)) if (is_generic_type(t_1)) else (False)
     
-    if arrow_108():
+    if arrow_109():
         eltype : Any = get_generics(t)[0]
         if data.tag == 8:
             return commented_1(0, data.fields[0], obj_from_comp(eltype, data.fields[1]))
@@ -992,97 +992,97 @@ def obj_from_comp(t: Any, data: Component) -> Any:
             active_pattern_result1058 : Any = _007CNotCList_007CIsCList_007C(data)
             if active_pattern_result1058.tag == 1:
                 if eltype_1 is int32_type:
-                    def arrow_109(i: int, t: Any=t, data: Component=data) -> int:
+                    def arrow_110(i: int, t: Any=t, data: Component=data) -> int:
                         return int(to_number(num_from_comp(active_pattern_result1058.fields[0][i])))
                     
-                    return initialize(len(active_pattern_result1058.fields[0]), arrow_109, Int32Array)
+                    return initialize(len(active_pattern_result1058.fields[0]), arrow_110, Int32Array)
                 
                 elif eltype_1 == class_type("System.Int64"):
-                    def arrow_110(i_1: int, t: Any=t, data: Component=data) -> Any:
+                    def arrow_111(i_1: int, t: Any=t, data: Component=data) -> Any:
                         return from_number(to_number_1(num_from_comp(active_pattern_result1058.fields[0][i_1])), False)
                     
-                    return initialize(len(active_pattern_result1058.fields[0]), arrow_110, None)
+                    return initialize(len(active_pattern_result1058.fields[0]), arrow_111, None)
                 
                 elif eltype_1 is int16_type:
-                    def arrow_111(i_2: int, t: Any=t, data: Component=data) -> int:
+                    def arrow_112(i_2: int, t: Any=t, data: Component=data) -> int:
                         return (int(to_number(num_from_comp(active_pattern_result1058.fields[0][i_2]))) + 0x8000 & 0xFFFF) - 0x8000
                     
-                    return initialize(len(active_pattern_result1058.fields[0]), arrow_111, Int16Array)
+                    return initialize(len(active_pattern_result1058.fields[0]), arrow_112, Int16Array)
                 
                 elif eltype_1 is int8_type:
-                    def arrow_112(i_3: int, t: Any=t, data: Component=data) -> int:
+                    def arrow_113(i_3: int, t: Any=t, data: Component=data) -> int:
                         return (int(to_number(num_from_comp(active_pattern_result1058.fields[0][i_3]))) + 0x80 & 0xFF) - 0x80
                     
-                    return initialize(len(active_pattern_result1058.fields[0]), arrow_112, Int8Array)
+                    return initialize(len(active_pattern_result1058.fields[0]), arrow_113, Int8Array)
                 
                 elif eltype_1 is uint32_type:
-                    def arrow_113(i_4: int, t: Any=t, data: Component=data) -> int:
+                    def arrow_114(i_4: int, t: Any=t, data: Component=data) -> int:
                         return int(to_number(num_from_comp(active_pattern_result1058.fields[0][i_4]))+0x100000000 if to_number(num_from_comp(active_pattern_result1058.fields[0][i_4])) < 0 else to_number(num_from_comp(active_pattern_result1058.fields[0][i_4])))
                     
-                    return initialize(len(active_pattern_result1058.fields[0]), arrow_113, Uint32Array)
+                    return initialize(len(active_pattern_result1058.fields[0]), arrow_114, Uint32Array)
                 
                 elif eltype_1 == class_type("System.UInt64"):
-                    def arrow_114(i_5: int, t: Any=t, data: Component=data) -> Any:
+                    def arrow_115(i_5: int, t: Any=t, data: Component=data) -> Any:
                         return from_number(to_number_1(num_from_comp(active_pattern_result1058.fields[0][i_5])), True)
                     
-                    return initialize(len(active_pattern_result1058.fields[0]), arrow_114, None)
+                    return initialize(len(active_pattern_result1058.fields[0]), arrow_115, None)
                 
                 elif eltype_1 is uint8_type:
-                    def arrow_115(i_6: int, t: Any=t, data: Component=data) -> int:
+                    def arrow_116(i_6: int, t: Any=t, data: Component=data) -> int:
                         return int(to_number(num_from_comp(active_pattern_result1058.fields[0][i_6]))+0x100 if to_number(num_from_comp(active_pattern_result1058.fields[0][i_6])) < 0 else to_number(num_from_comp(active_pattern_result1058.fields[0][i_6]))) & 0xFF
                     
-                    return initialize(len(active_pattern_result1058.fields[0]), arrow_115, Uint8Array)
+                    return initialize(len(active_pattern_result1058.fields[0]), arrow_116, Uint8Array)
                 
                 elif eltype_1 is uint16_type:
-                    def arrow_116(i_7: int, t: Any=t, data: Component=data) -> int:
+                    def arrow_117(i_7: int, t: Any=t, data: Component=data) -> int:
                         return int(to_number(num_from_comp(active_pattern_result1058.fields[0][i_7]))+0x10000 if to_number(num_from_comp(active_pattern_result1058.fields[0][i_7])) < 0 else to_number(num_from_comp(active_pattern_result1058.fields[0][i_7]))) & 0xFFFF
                     
-                    return initialize(len(active_pattern_result1058.fields[0]), arrow_116, Uint16Array)
+                    return initialize(len(active_pattern_result1058.fields[0]), arrow_117, Uint16Array)
                 
                 elif eltype_1 is float64_type:
-                    def arrow_117(i_8: int, t: Any=t, data: Component=data) -> float:
+                    def arrow_118(i_8: int, t: Any=t, data: Component=data) -> float:
                         return to_number_1(num_from_comp(active_pattern_result1058.fields[0][i_8]))
-                    
-                    return initialize(len(active_pattern_result1058.fields[0]), arrow_117, Float64Array)
-                
-                elif eltype_1 is float64_type:
-                    def arrow_118(i_9: int, t: Any=t, data: Component=data) -> float:
-                        return to_number_1(num_from_comp(active_pattern_result1058.fields[0][i_9]))
                     
                     return initialize(len(active_pattern_result1058.fields[0]), arrow_118, Float64Array)
                 
-                elif eltype_1 == class_type("System.Decimal"):
-                    def arrow_119(i_10: int, t: Any=t, data: Component=data) -> Any:
-                        return num_from_comp(active_pattern_result1058.fields[0][i_10])
+                elif eltype_1 is float64_type:
+                    def arrow_119(i_9: int, t: Any=t, data: Component=data) -> float:
+                        return to_number_1(num_from_comp(active_pattern_result1058.fields[0][i_9]))
                     
-                    return initialize(len(active_pattern_result1058.fields[0]), arrow_119, None)
+                    return initialize(len(active_pattern_result1058.fields[0]), arrow_119, Float64Array)
                 
-                elif eltype_1 is string_type:
-                    def arrow_120(i_11: int, t: Any=t, data: Component=data) -> str:
-                        return string_from_comp(active_pattern_result1058.fields[0][i_11])
+                elif eltype_1 == class_type("System.Decimal"):
+                    def arrow_120(i_10: int, t: Any=t, data: Component=data) -> Any:
+                        return num_from_comp(active_pattern_result1058.fields[0][i_10])
                     
                     return initialize(len(active_pattern_result1058.fields[0]), arrow_120, None)
                 
-                elif eltype_1 is bool_type:
-                    def arrow_121(i_12: int, t: Any=t, data: Component=data) -> bool:
-                        return bool_from_comp(active_pattern_result1058.fields[0][i_12])
+                elif eltype_1 is string_type:
+                    def arrow_121(i_11: int, t: Any=t, data: Component=data) -> str:
+                        return string_from_comp(active_pattern_result1058.fields[0][i_11])
                     
                     return initialize(len(active_pattern_result1058.fields[0]), arrow_121, None)
+                
+                elif eltype_1 is bool_type:
+                    def arrow_122(i_12: int, t: Any=t, data: Component=data) -> bool:
+                        return bool_from_comp(active_pattern_result1058.fields[0][i_12])
+                    
+                    return initialize(len(active_pattern_result1058.fields[0]), arrow_122, None)
                 
                 elif eltype_1 is unit_type:
                     raise FromCompinentError("component does not support unit type.")
                 
                 elif eltype_1 is char_type:
-                    def arrow_122(i_13: int, t: Any=t, data: Component=data) -> str:
+                    def arrow_123(i_13: int, t: Any=t, data: Component=data) -> str:
                         return char_from_comp(active_pattern_result1058.fields[0][i_13])
                     
-                    return initialize(len(active_pattern_result1058.fields[0]), arrow_122, None)
+                    return initialize(len(active_pattern_result1058.fields[0]), arrow_123, None)
                 
                 else: 
-                    def arrow_123(i_14: int, t: Any=t, data: Component=data) -> Any:
+                    def arrow_124(i_14: int, t: Any=t, data: Component=data) -> Any:
                         return obj_from_comp(eltype_1, active_pattern_result1058.fields[0][i_14])
                     
-                    return initialize(len(active_pattern_result1058.fields[0]), arrow_123, None)
+                    return initialize(len(active_pattern_result1058.fields[0]), arrow_124, None)
                 
             
             else: 
@@ -1107,11 +1107,11 @@ def obj_from_comp(t: Any, data: Component) -> Any:
         
     
     else: 
-        def arrow_124(t: Any=t, data: Component=data) -> bool:
+        def arrow_125(t: Any=t, data: Component=data) -> bool:
             t_2 : Any = t
             return equals_1(get_generic_type_definition(t_2), list_type(obj_type)) if (is_generic_type(t_2)) else (False)
         
-        if arrow_124():
+        if arrow_125():
             eltype_3 : Any = get_generics(t)[0]
             (pattern_matching_result_1, spec_3) = (None, None)
             if data.tag == 7:
@@ -1143,11 +1143,11 @@ def obj_from_comp(t: Any, data: Component) -> Any:
             
         
         else: 
-            def arrow_125(t: Any=t, data: Component=data) -> bool:
+            def arrow_126(t: Any=t, data: Component=data) -> bool:
                 t_3 : Any = t
                 return equals_1(get_generic_type_definition(t_3), lift_array_1_reflection(obj_type)) if (is_generic_type(t_3)) else (False)
             
-            if arrow_125():
+            if arrow_126():
                 raise FromCompinentError("lift_array is not allowed outside fields")
             
             elif is_record(t):
@@ -1186,10 +1186,10 @@ def obj_from_comp(t: Any, data: Component) -> Any:
                 else: 
                     raise FromCompinentError(to_text(interpolate("convert %P() to %P()", [Component__get_kind(data), t])))
                 
-                def arrow_126(i_16: int, t: Any=t, data: Component=data) -> Any:
+                def arrow_127(i_16: int, t: Any=t, data: Component=data) -> Any:
                     return obj_from_comp(eltypes[i_16], seq_3[i_16])
                 
-                return make_tuple(initialize(len(seq_3), arrow_126, None), t)
+                return make_tuple(initialize(len(seq_3), arrow_127, None), t)
             
             elif is_union(t):
                 pattern_input : Tuple[str, List[Component]]
@@ -1374,11 +1374,11 @@ def obj_to_comp(t_mut: Any, o_mut: Any) -> Component:
             
         
         else: 
-            def arrow_127(t: Any=t, o: Any=o) -> bool:
+            def arrow_128(t: Any=t, o: Any=o) -> bool:
                 t_1 : Any = t
                 return equals_1(get_generic_type_definition(t_1), commented_1_reflection(obj_type)) if (is_generic_type(t_1)) else (False)
             
-            if arrow_127():
+            if arrow_128():
                 match_value_1 : commented_1[Any] = o
                 return Component(8, match_value_1.fields[0], obj_to_comp(get_generics(t)[0], match_value_1.fields[1]))
             
@@ -1395,35 +1395,35 @@ def obj_to_comp(t_mut: Any, o_mut: Any) -> Component:
                 
             
             else: 
-                def arrow_128(t: Any=t, o: Any=o) -> bool:
+                def arrow_129(t: Any=t, o: Any=o) -> bool:
                     t_2 : Any = t
                     return equals_1(get_generic_type_definition(t_2), lift_array_1_reflection(obj_type)) if (is_generic_type(t_2)) else (False)
                 
-                if arrow_128():
+                if arrow_129():
                     raise ToComponentError("lift_array is not allowed outside fields")
                 
                 elif is_record(t):
-                    def arrow_132(t: Any=t, o: Any=o) -> IEnumerable[Component]:
-                        def arrow_131(fi: Any) -> IEnumerable[Component]:
-                            def arrow_129(__unit: Any=None) -> bool:
+                    def arrow_133(t: Any=t, o: Any=o) -> IEnumerable[Component]:
+                        def arrow_132(fi: Any) -> IEnumerable[Component]:
+                            def arrow_130(__unit: Any=None) -> bool:
                                 t_3 : Any = fi[1]
                                 return equals_1(get_generic_type_definition(t_3), lift_array_1_reflection(obj_type)) if (is_generic_type(t_3)) else (False)
                             
-                            if arrow_129():
+                            if arrow_130():
                                 eltype_4 : Any = get_generics(fi[1])[0]
-                                def arrow_130(elt: Any) -> Component:
+                                def arrow_131(elt: Any) -> Component:
                                     return obj_to_comp(eltype_4, elt)
                                 
-                                return map_2(arrow_130, get_record_field(o, fi).elements)
+                                return map_2(arrow_131, get_record_field(o, fi).elements)
                             
                             else: 
                                 f_1 : Component = obj_to_comp(fi[1], get_record_field(o, fi))
                                 return singleton(Component(4, name(fi), [f_1]))
                             
                         
-                        return collect(arrow_131, get_record_elements(t))
+                        return collect(arrow_132, get_record_elements(t))
                     
-                    fields : List[Component] = to_array_1(delay(arrow_132))
+                    fields : List[Component] = to_array_1(delay(arrow_133))
                     return Component(4, name(t), fields)
                 
                 elif is_tuple(t):
@@ -1436,35 +1436,35 @@ def obj_to_comp(t_mut: Any, o_mut: Any) -> Component:
                 elif is_union(t):
                     pattern_input : Tuple[Any, List[Any]] = get_union_fields(o, t)
                     case : Any = pattern_input[0]
-                    def arrow_139(t: Any=t, o: Any=o) -> IEnumerable[Component]:
+                    def arrow_140(t: Any=t, o: Any=o) -> IEnumerable[Component]:
                         i_2 : int = 0
-                        def arrow_138(fi_1: Any) -> IEnumerable[Component]:
+                        def arrow_139(fi_1: Any) -> IEnumerable[Component]:
                             f_2 : Any = pattern_input[1][i_2]
-                            def arrow_133(__unit: Any=None) -> bool:
+                            def arrow_134(__unit: Any=None) -> bool:
                                 t_4 : Any = fi_1[1]
                                 return equals_1(get_generic_type_definition(t_4), lift_array_1_reflection(obj_type)) if (is_generic_type(t_4)) else (False)
                             
-                            def arrow_135(__unit: Any=None) -> IEnumerable[Component]:
+                            def arrow_136(__unit: Any=None) -> IEnumerable[Component]:
                                 eltype_5 : Any = get_generics(fi_1[1])[0]
-                                def arrow_134(elt_1: Any) -> Component:
+                                def arrow_135(elt_1: Any) -> Component:
                                     return obj_to_comp(eltype_5, elt_1)
                                 
-                                return map_2(arrow_134, f_2.elements)
+                                return map_2(arrow_135, f_2.elements)
                             
-                            def arrow_136(__unit: Any=None) -> IEnumerable[Component]:
+                            def arrow_137(__unit: Any=None) -> IEnumerable[Component]:
                                 f_0027_1 : Component = obj_to_comp(fi_1[1], f_2)
                                 return singleton(Component(4, name(fi_1), [f_0027_1]))
                             
-                            def arrow_137(__unit: Any=None) -> IEnumerable[Component]:
+                            def arrow_138(__unit: Any=None) -> IEnumerable[Component]:
                                 nonlocal i_2
                                 i_2 = (i_2 + 1) or 0
                                 return empty_1()
                             
-                            return append(arrow_135() if (arrow_133()) else (arrow_136()), delay(arrow_137))
+                            return append(arrow_136() if (arrow_134()) else (arrow_137()), delay(arrow_138))
                         
-                        return collect(arrow_138, get_union_case_fields(case))
+                        return collect(arrow_139, get_union_case_fields(case))
                     
-                    fields_1 : List[Component] = to_array_1(delay(arrow_139))
+                    fields_1 : List[Component] = to_array_1(delay(arrow_140))
                     return Component(4, name(case).lower(), fields_1)
                 
                 else: 
@@ -1479,20 +1479,20 @@ space2 : Doc = Doc(5, seg("  "))
 
 def serialize_comp(x: Component) -> Doc:
     if x.tag == 7:
-        def arrow_140(s_1: str, x: Component=x) -> Doc:
+        def arrow_141(s_1: str, x: Component=x) -> Doc:
             return seg(s_1)
         
         def mapping(x_3: specifier, x: Component=x) -> str:
             return specifier__get_Show(x_3)
         
-        arr : List[Doc] = map(arrow_140, map(mapping, x.fields[0], None), None)
+        arr : List[Doc] = map(arrow_141, map(mapping, x.fields[0], None), None)
         return separray(seg(" \u0026\u0026 "), arr)
     
     elif x.tag == 8:
-        def arrow_142(s_2: str, x: Component=x) -> Doc:
+        def arrow_143(s_2: str, x: Component=x) -> Doc:
             return seg(s_2)
         
-        return vsep(of_array([vsep(of_array(map(arrow_142, x.fields[0], None))), serialize_comp(x.fields[1])]))
+        return vsep(of_array([vsep(of_array(map(arrow_143, x.fields[0], None))), serialize_comp(x.fields[1])]))
     
     elif x.tag == 1:
         return seg(to_string_1(x.fields[0]))
@@ -1512,42 +1512,42 @@ def serialize_comp(x: Component) -> Doc:
         return seg("null")
     
     elif x.tag == 5:
-        def arrow_144(x: Component=x) -> bool:
+        def arrow_145(x: Component=x) -> bool:
             test_expr : List[Component] = x.fields[0]
-            def arrow_143(x_1: Component, y: Component) -> bool:
+            def arrow_144(x_1: Component, y: Component) -> bool:
                 return equals(x_1, y)
             
-            return len(test_expr) == 1 if (not equals_with(arrow_143, test_expr, None)) else (False)
+            return len(test_expr) == 1 if (not equals_with(arrow_144, test_expr, None)) else (False)
         
-        if arrow_144():
+        if arrow_145():
             elt : Component = x.fields[0][0]
             return Doc_op_Multiply_Z32C4A9C0(Doc_op_Multiply_Z32C4A9C0(seg("["), align(serialize_comp(elt))), seg("]"))
         
         else: 
-            def arrow_145(x_5: Component, x: Component=x) -> Doc:
+            def arrow_146(x_5: Component, x: Component=x) -> Doc:
                 return serialize_comp(x_5)
             
-            it : Doc = indent(2, vsep(of_array(map(arrow_145, x.fields[0], None))))
+            it : Doc = indent(2, vsep(of_array(map(arrow_146, x.fields[0], None))))
             return vsep(of_array([seg("["), it, seg("]")]))
         
     
     elif x.tag == 4:
-        def arrow_147(x: Component=x) -> bool:
+        def arrow_148(x: Component=x) -> bool:
             test_expr_1 : List[Component] = x.fields[1]
-            def arrow_146(x_2: Component, y_1: Component) -> bool:
+            def arrow_147(x_2: Component, y_1: Component) -> bool:
                 return equals(x_2, y_1)
             
-            return len(test_expr_1) == 1 if (not equals_with(arrow_146, test_expr_1, None)) else (False)
+            return len(test_expr_1) == 1 if (not equals_with(arrow_147, test_expr_1, None)) else (False)
         
-        if arrow_147():
+        if arrow_148():
             elt_1 : Component = x.fields[1][0]
             return Doc_op_Addition_Z32C4A9C0(seg(x.fields[0]), align(serialize_comp(elt_1)))
         
         else: 
-            def arrow_148(x_7: Component, x: Component=x) -> Doc:
+            def arrow_149(x_7: Component, x: Component=x) -> Doc:
                 return serialize_comp(x_7)
             
-            it_1 : Doc = indent(2, vsep(of_array(map(arrow_148, x.fields[1], None))))
+            it_1 : Doc = indent(2, vsep(of_array(map(arrow_149, x.fields[1], None))))
             return vsep(of_array([Doc_op_Addition_Z32C4A9C0(seg(x.fields[0]), seg("{")), it_1, seg("}")]))
         
     

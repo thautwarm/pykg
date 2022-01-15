@@ -754,3 +754,4 @@ let inline deserialize<'a> (a: string) =
     parse_comp a
     |> objFromComp typeof<'a>
     |> unbox<'a>
+

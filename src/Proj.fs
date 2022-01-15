@@ -34,3 +34,6 @@ let parse_project (s: string) =
 
 let parse_metadata (s: string) =
     deserialize<metadata> s
+
+let serialize_dep (d : dep) =
+    serialize<dep> d

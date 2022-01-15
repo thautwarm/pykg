@@ -1,9 +1,10 @@
 from __future__ import annotations
 from _fable_pykg_infr import (Version, parse)
-from typing import (List, Optional)
+from typing import (List, Optional, Any)
 from ..fable_modules.fable_library.reflection import (TypeInfo, string_type, array_type, record_type, option_type, class_type)
 from ..fable_modules.fable_library.types import Record
-from .comp import (commented_1, specifier, specifier_reflection, commented_1_reflection, lift_array_1, lift_array_1_reflection, obj_from_comp)
+from .comp import (commented_1, specifier, specifier_reflection, commented_1_reflection, lift_array_1, lift_array_1_reflection, obj_from_comp, serialize_comp, obj_to_comp, Component)
+from .pretty_doc import (show_doc, default_render_options)
 
 def expr_7() -> TypeInfo:
     return record_type("FablePykg.Proj.dep", [], dep, lambda: [["name", string_type], ["version", commented_1_reflection(array_type(specifier_reflection()))]])
@@ -63,7 +64,7 @@ class dist(Record):
 
 dist_reflection = expr_10
 
-def expr_12() -> TypeInfo:
+def expr_11() -> TypeInfo:
     return record_type("FablePykg.Proj.metadata", [], metadata, lambda: [["name", commented_1_reflection(string_type)], ["authors", lift_array_1_reflection(commented_1_reflection(author_reflection()))], ["distributions", lift_array_1_reflection(commented_1_reflection(dist_reflection()))]])
 
 
@@ -75,7 +76,7 @@ class metadata(Record):
         self.distributions = distributions
     
 
-metadata_reflection = expr_12
+metadata_reflection = expr_11
 
 def parse_project(s: str) -> project:
     return obj_from_comp(project_reflection(), parse(s))
@@ -83,5 +84,12 @@ def parse_project(s: str) -> project:
 
 def parse_metadata(s: str) -> metadata:
     return obj_from_comp(metadata_reflection(), parse(s))
+
+
+def serialize_dep(d: dep) -> str:
+    def arrow_12(o: Any=None, d: dep=d) -> Component:
+        return obj_to_comp(dep_reflection(), o)
+    
+    return show_doc(default_render_options, serialize_comp(arrow_12(d)))
 
 

@@ -242,11 +242,11 @@ def render(opts: render_options, setences: List[List[DocPrimitive]], write: Call
 
 
 def pretty(s: Any=None) -> Doc:
-    def arrow_11(s: __A=s) -> str:
+    def arrow_13(s: __A=s) -> str:
         copy_of_struct : __A = s
         return to_string(copy_of_struct)
     
-    return Doc(4, arrow_11())
+    return Doc(4, arrow_13())
 
 
 def seg(s: str) -> Doc:
@@ -345,10 +345,10 @@ def separray(sep: Doc, arr: List[Doc]) -> Doc:
 
 def show_doc(opts: render_options, doc: Doc) -> str:
     sb : Any = StringBuilder__ctor()
-    def arrow_13(x: str, opts: render_options=opts, doc: Doc=doc) -> None:
+    def arrow_14(x: str, opts: render_options=opts, doc: Doc=doc) -> None:
         ignore(StringBuilder__Append_Z721C83C5(sb, x))
     
-    render(opts, compile_to_prims(doc), arrow_13)
+    render(opts, compile_to_prims(doc), arrow_14)
     return to_string(sb)
 
 

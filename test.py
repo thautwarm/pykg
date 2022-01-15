@@ -1,9 +1,12 @@
 from _fable_pykg.program import *
+from _fable_pykg.src.proj import parse_metadata
 from _fable_pykg_infr.fetch_dependencies import get_deps, DEFAULT_MIRROR, DependencyUnsatisfied
 from _fable_pykg_infr.log import error
 from pprint import pprint
+
+metadata = parse_metadata(open("../comf-index/fspy/F/fable-pykg.comf").read())
 try:
-    pprint(get_deps("file:///../comf-index", "fspy/fable-pykg"))
+    pprint(get_deps("file:///../comf-index", metadata))
 except DependencyUnsatisfied as e:
     error('dependencies not sastified:\n' + '\n'.join(['- ' + line for line in e.unsatisified_reasons]))
 
