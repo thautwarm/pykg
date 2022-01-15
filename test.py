@@ -1,7 +1,12 @@
 from _fable_pykg.program import *
-from _fable_pykg_infr.fetch_dependencies import get_deps, DEFAULT_MIRROR
+from _fable_pykg_infr.fetch_dependencies import get_deps, DEFAULT_MIRROR, DependencyUnsatisfied
+from _fable_pykg_infr.log import error
 from pprint import pprint
-pprint(get_deps(DEFAULT_MIRROR, "fspy/fable-pykg"))
+try:
+    pprint(get_deps("file:///../comf-index", "fspy/fable-pykg"))
+except DependencyUnsatisfied as e:
+    error('dependencies not sastified:\n' + '\n'.join(['- ' + line for line in e.unsatisified_reasons]))
+
 
 # test_load_meta(r"""
 # format v0.1

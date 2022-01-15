@@ -11,23 +11,28 @@ import typing
 
 if typing.TYPE_CHECKING:
     from typing import TypeVar, Generator
-    _T = TypeVar('_T')
+
+    _T = TypeVar("_T")
 
 
 # https://stackoverflow.com/questions/24728088/python-parse-http-response-string
-class FakeSocket():
+class FakeSocket:
     def __init__(self, response_bytes):
         self._file = io.BytesIO(response_bytes)
+
     def makefile(self, *args, **kwargs):
         return self._file
 
+
 Pending = None
+
 
 def parse_http_response(response_bytes: bytes | bytearray):
     source = FakeSocket(response_bytes)
     response = HTTPResponse(source)  # type: ignore
     response.begin()
     return response
+
 
 def async_apply(fn, arg, hang_on: Type[OSError] = BlockingIOError):
     while True:
@@ -86,6 +91,10 @@ def aread_sock(ssl_sock, size, timeout: float = 60):
         except socket.error:
             raise
 
+
+DUMMY_RESP_BYTES = b"HTTP/1.1 200 OK\r\n\r\n"
+
+
 def areadpage(url, timeout=10):
     protocol, _, host, path = url.split("/", 3)
     host, path = map(str.encode, (host, path))
@@ -97,10 +106,13 @@ def areadpage(url, timeout=10):
         port = 443
     elif protocol == "http:":
         port = 80
+    elif protocol == "file:":
+        resp = parse_http_response(DUMMY_RESP_BYTES)
+        return resp, open(path, "rb").read()
     else:
         raise IOError(f"unknown protocol: {protocol}")
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock, context.wrap_socket(
-        sock, server_hostname=host
+        sock, server_hostname=host.decode(encoding="utf-8")
     ) as ssl_sock:
         ssl_sock.connect((host, port))
         start_time = time.time()
@@ -112,16 +124,18 @@ def areadpage(url, timeout=10):
         while True:
             c = yield from aread_sock(ssl_sock, 1, timeout - (time.time() - start_time))
             chunk.extend(c)
-            if chunk.endswith(b'\r\n\r\n'):
+            if chunk.endswith(b"\r\n\r\n"):
                 break
 
         resp = parse_http_response(chunk)
         if resp.status != 200:
-            return resp, b''
+            return resp, b""
 
         ios = io.BytesIO()
         while True:
-            data = yield from aread_sock(ssl_sock, 1024, timeout - (time.time() - start_time))
+            data = yield from aread_sock(
+                ssl_sock, 1024, timeout - (time.time() - start_time)
+            )
             if not data:
                 return resp, ios.getvalue()
             ios.write(data)

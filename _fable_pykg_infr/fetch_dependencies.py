@@ -13,7 +13,7 @@ from _fable_pykg.src import comp
 from . import log
 from .errors import InvalidComfigVersion
 from .version import Version as version
-from .z3_dep_solver import solve_deps, lt_tuple, le_tuple, gt_tuple, ge_tuple, eq_tuple, ne_tuple
+from .z3_dep_solver import lt_tuple, le_tuple, gt_tuple, ge_tuple, eq_tuple, ne_tuple
 from .z3_dep_solver import (
     get_major as _get_major,
     get_micro as _get_micro,
@@ -21,7 +21,6 @@ from .z3_dep_solver import (
 )
 from .z3_dep_solver import tuple_var as _tuple_var, TupleCons as _TupleCons
 from collections import OrderedDict, deque
-from functools import cmp_to_key, lru_cache
 import z3
 import re
 import typing
@@ -56,12 +55,11 @@ def request_pykg(mirror: str, package_name: str):
         )
         return None
     except Exception as e:
-        log.error(f"fatal error from .comf ({url}):" + str(e))
+        log.error(f"fatal error from .comf ({url}): " + str(e))
         raise
 
 
 if not typing.TYPE_CHECKING:
-    request_pykg = lru_cache()(request_pykg)
     Z3Tuple = object
     Z3Int = object
     tuple_var = _tuple_var
@@ -150,7 +148,7 @@ class DependencyUnsatisfied(Exception):
 
     def __init__(self, reasons: list[str]):
         super().__init__()
-        self.reasons = reasons
+        self.unsatisified_reasons = reasons
 
 def z3_tuple_to_version(x: Z3Tuple) -> version:
     major = z3.simplify(get_major(x)).as_long()  # type: ignore
@@ -187,7 +185,7 @@ def get_deps(mirror: str, package_name: PackageId) -> list[tuple[PackageId, vers
         z3_var_ver = reached[pid]
         for ver, dependencies in dists.items():
             cond = z3_var_ver == TupleCons(ver.major, ver.minor, ver.micro)
-            solver.assert_and_track(cond, "direct requirement " + pid + str(ver))
+            solver.assert_and_track(cond, f"direct requirement {pid} {ver}")
             for dep_pid, dep_versions in dependencies.items():
                 z3_var_dep_ver = reached[dep_pid]
                 for each_spec in dep_versions:
