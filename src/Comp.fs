@@ -1,7 +1,9 @@
 module FablePykg.Comp
 open Microsoft.FSharp.Reflection
+open Fable.Core
 
 let AllowOmit_Name = "name"
+let AllowOmit_Version = "version"
 let AllowUnused_Field = "_unused"
 
 exception ParseComponentError of string
@@ -56,13 +58,25 @@ type 'a lift_array = { elements: 'a ResizeArray }
 let create_lift_array<'a> (x: 'a ResizeArray) = { elements = x }
 
 type 'a commented = Commented of comments : string array * value: 'a
-type version = { major: int; minor: int; micro: int}
-     with member v.Show = $"v{v.major}.{v.minor}.{v.micro}"
-          override this.ToString() = this.Show
+    with member self.uncomment =
+            let (Commented(_, v)) = self in v
 
-let mkVersion a b c = { major=a; minor=b; micro=c }
+let uncomment (a: _ commented) = a.uncomment
+
+[<Import("Version", from = "_fable_pykg_infr.version")>]
+type version(major: int, minor: int, micro: int) =
+    abstract member major: int
+    override this.major = nativeOnly
+    abstract member minor: int
+    override this.minor = nativeOnly
+    abstract member micro: int
+    override this.micro = nativeOnly
+
+let mkVersion (major: int) (minor: int) (micro: int) =
+    version(major, minor, micro)
+
 type specifier = { op: operator; version: version }
-    with member spec.Show = $"{spec.op.Show} {spec.version.Show}"
+    with member spec.Show = $"{spec.op.Show} {spec.version}"
          override this.ToString() = this.Show
 
 [<CompiledName("mk_specifier")>]
@@ -70,6 +84,7 @@ let mkSpecifier op v =
     { op=op; version = v }
 
 type specifier_set = specifier array
+
 
 type Component =
 | CNull
@@ -307,23 +322,29 @@ and extractFieldArguments (tname: string) (finfo: System.Reflection.PropertyInfo
             let (fname, ftype) = finfo.[i]
             let is_lifted = lifted_fields.Contains i
             match each with
-            // lift_array is never commented!
+            | CCons(fname', _) | CCommented(_, CCons(fname', _)) 
+              when is_lifted && fname' = fname ->
+                let o = objFromComp ftype each
+                unbox<lift_array<_>>(arguments.[i]).elements.Add(o)
+                break' <- true                
             | CCommented(comments, CCons(fname', [|fvalue|])) when fname' = fname ->
                 let o = objFromComp ftype (CCommented(comments, fvalue))
                 arguments.[i] <- o
                 break' <- true
             | CCons(fname', [|fvalue|]) when fname' = fname ->
-                if is_lifted then
-                    let o = objFromComp ftype each
-                    (unbox<lift_array<obj>> arguments.[i]).elements.Add(o)
-                else
-                    let o = objFromComp ftype fvalue
-                    arguments.[i] <- o
+                let o = objFromComp ftype fvalue
+                arguments.[i] <- o
                 break' <- true
             | CCommented(_, (CStr _)) as fvalue when arguments.[i] = null && fname = AllowOmit_Name ->
                 arguments.[i] <- objFromComp ftype fvalue
                 break' <- true
             | CStr _ as fvalue when arguments.[i] = null && fname = AllowOmit_Name ->
+                arguments.[i] <- objFromComp ftype fvalue
+                break' <- true
+            | CCommented(_, (CSpec _ | CVer _)) as fvalue when arguments.[i] = null && fname = AllowOmit_Version ->
+                arguments.[i] <- objFromComp ftype fvalue
+                break' <- true
+            | (CSpec _ | CVer _) as fvalue when arguments.[i] = null && fname = AllowOmit_Version ->
                 arguments.[i] <- objFromComp ftype fvalue
                 break' <- true
             | _ -> ()
@@ -490,9 +511,10 @@ and objFromComp (t: System.Type) (data: Component) =
             match data with
             | CCons(cname', elements) -> cname', elements
             | _ -> raise <| FromCompinentError $"convert {data.kind} to {t}"
+        let cname' = cname'.ToLowerInvariant()
         match 
             FSharpType.GetUnionCases t
-            |> Array.tryFind (fun case -> case.Name = cname')
+            |> Array.tryFind (fun case -> case.Name.ToLowerInvariant() = cname')
         with
         | None -> raise <| FromCompinentError $"unknown constructor {cname'}"
         | Some case ->
@@ -664,7 +686,7 @@ let rec objToComp (t: System.Type) (o: obj) =
                     yield CCons(fi.Name, [|f'|])
                 i <- i + 1
         |]
-        CCons(case.Name, fields)
+        CCons(case.Name.ToLowerInvariant(), fields)
     else
         raise <| ToComponentError $"unsupported data type fromJson: {t}"
 
@@ -674,7 +696,7 @@ let space2 = Breakable (seg "  ")
 
 let rec serializeComp : Component -> Doc = fun x ->
     match x with
-    | CVer v -> seg v.Show
+    | CVer v -> seg <| string v
     | CSpec specs -> 
         specs 
         |> Array.map (fun x -> x.Show)
@@ -724,7 +746,7 @@ let inline serialize<'a> (a: 'a) =
     |> serializeComp
     |> showDoc defaultRenderOptions
 
-open Fable.Core
+
 [<Import("parse", "_fable_pykg_infr.init")>]
 let parse_comp : string -> Component = nativeOnly
 

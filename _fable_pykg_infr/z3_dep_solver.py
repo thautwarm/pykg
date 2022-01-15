@@ -12,17 +12,12 @@ TupleCons = TupleType.cons
 def create_tuple(name):
     return z3.Const(name, TupleType)
 
+tuple_var = create_tuple
+
 
 get_major = TupleType.major
 get_minor = TupleType.minor
 get_micro = TupleType.micro
-
-cmp_tuple = z3.Function("compare_tuple", TupleType, TupleType)
-cmp_int = z3.Function("compare_int", z3.IntSort(), z3.IntSort())
-
-le_tuple = z3.Function("le_tuple", TupleType, TupleType, z3.BoolSort())
-lt_tuple = z3.Function("lt_tuple", TupleType, TupleType, z3.BoolSort())
-eq_tuple = z3.Function("eq_tuple", TupleType, TupleType, z3.BoolSort())
 
 T = z3.BoolVal(True)
 F = z3.BoolVal(False)
@@ -53,7 +48,14 @@ def ge_tuple(a, b):
 
 
 def gt_tuple(a, b):
-    return ge_tuple(b, a)
+    return lt_tuple(b, a)
+
+
+def eq_tuple(a, b):
+    return a == b
+
+def ne_tuple(a, b):
+    return a != b
 
 
 def solve_deps(deps: list):

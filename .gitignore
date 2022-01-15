@@ -1,7 +1,10 @@
+.vscode/
+/fable.exe
 /test.json
 /test1.json
 /msg.json
-
+# local z3 test
+/dep_solver
 /Fable_AJson/**/*
 /Fable_AJson/*
 

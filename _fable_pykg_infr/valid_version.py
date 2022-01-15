@@ -21,7 +21,7 @@ specifier_regex = re.compile(
 
 def parse_specifier(ver_string: str) -> tuple[str, tuple[int, int, int]] | None:
     if res := specifier_regex.match(ver_string):
-        x = res.groupdict(default=0)
+        x = res.groupdict(default='0')
         op = x["op"]
         major = x["major"]
         minor = x["minor"]

@@ -1,31 +1,24 @@
-from typing import (TypeVar, Any)
-from .fable_modules.fable_library.map import (empty, try_find, add)
-from .fable_modules.fable_library.option import Option
+from __future__ import annotations
+from _fable_pykg_infr import parse
+from typing import Any
 from .fable_modules.fable_library.string import (to_console, printf)
-from .fable_modules.fable_library.util import compare
+from .src.comp import (serialize_comp, obj_to_comp, Component, obj_from_comp)
+from .src.pretty_doc import (show_doc, default_render_options)
+from .src.proj import (project_reflection, metadata_reflection)
 
-__A = TypeVar("__A")
-
-def d() -> Any:
-    class ObjectExpr35:
-        @property
-        def Compare(self) -> Any:
-            def arrow_34(x: __A, y: __A=None) -> int:
-                return compare(x, y)
-            
-            return arrow_34
-        
-    return empty(ObjectExpr35())
+def test_load_proj(comfig_string: str) -> None:
+    def arrow_14(o: Any=None, comfig_string: str=comfig_string) -> Component:
+        return obj_to_comp(project_reflection(), o)
+    
+    arg10 : str = show_doc(default_render_options, serialize_comp(arrow_14(obj_from_comp(project_reflection(), parse(comfig_string)))))
+    to_console(printf("%s"))(arg10)
 
 
-match_value : Option[int] = try_find("asda", add("asda", 1, d()))
-
-
-if match_value is not None:
-    v : int = match_value or 0
-    to_console(printf("%A"))(v)
-
-else: 
-    raise Exception("Match failure")
+def test_load_meta(comfig_string: str) -> None:
+    def arrow_15(o: Any=None, comfig_string: str=comfig_string) -> Component:
+        return obj_to_comp(metadata_reflection(), o)
+    
+    arg10 : str = show_doc(default_render_options, serialize_comp(arrow_15(obj_from_comp(metadata_reflection(), parse(comfig_string)))))
+    to_console(printf("%s"))(arg10)
 
 

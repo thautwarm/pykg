@@ -1,7 +1,8 @@
 from lark import Token
 from decimal import Decimal
 from _fable_pykg.src.comp import *
-
+from .version import Version, mk_version
+version = Version
 
 def lexeme(tk: Token):
     return str(tk)

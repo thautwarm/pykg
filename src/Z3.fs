@@ -7,26 +7,26 @@ type version = int * int * int
 
 [<Import("AstRef", "z3")>]
 type z3<'a> =
-    
+
     [<Import("Or", "z3")>]
     static member (.||) (a: z3<bool>, b: z3<bool>): z3<bool> = nativeOnly
-    
+
     [<Import("And", "z3")>]
     static member (.&&) (a: z3<bool>, b: z3<bool>): z3<bool> = nativeOnly
-    
+
 
     [<Emit("$0 + $1")>]
     static member (+) (a: z3<int>, b: z3<int>) = nativeOnly
-    
+
     [<Import("lt_tuple", "_fable_pykg_infr.z3_dep_solver")>]
     static member (.<) (a: z3<version>, b: z3<version>): z3<bool> = nativeOnly
-    
+
     [<Import("le_tuple", "_fable_pykg_infr.z3_dep_solver")>]
     static member (.<=) (a: z3<version>, b: z3<version>): z3<bool> = nativeOnly
-        
+
     [<Import("gt_tuple", "_fable_pykg_infr.z3_dep_solver")>]
     static member inline (.>) (a: z3<version>, b: z3<version>): z3<bool> =  nativeOnly
-    
+
     [<Import("ge_tuple", "_fable_pykg_infr.z3_dep_solver")>]
     static member inline (.>=) (a: z3<version>, b: z3<version>): z3<bool> = b .<= a
 
@@ -68,10 +68,10 @@ let unwrapInt (a: z3<int>): int = nativeOnly
 type _z3Model =
     [<Emit("$0[$1]")>]
     member self._get (a: z3<version>): z3<version> = nativeOnly
-       
+
 
 type z3Model( m: _z3Model ) =
-    
+
     member inline _.Item with get (a: z3<version>): version =
         let x = m._get a
         let major = get_major x |> simplify |> unwrapInt
@@ -96,11 +96,11 @@ let _constVersion (major: int) (minor: int) (micro: int): z3<version> = nativeOn
 let varVer (name: string) = nativeOnly
 
 let constVer (major: int, minor: int, micro: int): z3<version> =
-    _constVersion major minor micro        
+    _constVersion major minor micro
 
 
 let test () =
-    
+
     let v = varVer "m"
     let model =
         solve [|
@@ -111,5 +111,5 @@ let test () =
     match model with
     | None -> failwith "solution failed"
     | Some model ->
-    let sol = model.[v]    
+    let sol = model.[v]
     printf "%A" <| sol

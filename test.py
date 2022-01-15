@@ -1,19 +1,66 @@
 from _fable_pykg.program import *
-from _fable_pykg_infr.async_request_github import get_async_result, request_github_package_versions, request_github_package_with_tag
+from _fable_pykg_infr.fetch_dependencies import get_deps, DEFAULT_MIRROR
+from pprint import pprint
+pprint(get_deps(DEFAULT_MIRROR, "fspy/fable-pykg"))
 
-test_load_proj(r"""
-project{
-    "fable.sedlex"
-    author "thautwarm"
-    version v0.2
-    deps [ ]
-    src [
-       "Sedlex.fs"
-       "CodeGen.fs"
-       "CodeGen.Python.fs"
-    ]
-}
-""")
+# test_load_meta(r"""
+# format v0.1
+# metadata
+# {
+#     "lang/const"
+#     author "taine"
+#     dist
+#     {
+#         v0.1
+#         dep { "lang/python" >= v3.8 }
+#         dep { "fspy/fable-sedlex" >= v2.8 }
+#     }
+# }
+# """)
+
+
+# test_load_proj(r"""
+# format v0.1
+# project
+# {
+#     "lang/const" v0.1
+#     author "taine"
+#     mirror "default"
+#     builder "default"
+#     dep { "lang/python" >= v3.8 }
+#     dep { "fspy/fable-sedlex" >= v2.8 }
+#     src [
+#         "a.fs"
+#         "b.fs"
+#     ]
+# }
+# """)
+
+# test_load_meta(r"""
+# format v0.1
+# metadata
+# {
+#     "lang/python"
+#     dist v3.8.8
+# }
+# """)
+
+# from _fable_pykg_infr.async_request_github import get_async_result, request_github_package_versions, request_github_package_with_tag
+# from _fable_pykg_infr.init import parse
+# print(parse(r"""
+# v0.1.0
+# project{
+#     "fable.sedlex"
+#     author "thautwarm"
+#     version v0.2
+#     deps [ ]
+#     src [
+#        "Sedlex.fs"
+#        "CodeGen.fs"
+#        "CodeGen.Python.fs"
+#     ]
+# }
+# """))
 
 # print(request_github_package_versions("thautwarm/fable.sedlex"))
 

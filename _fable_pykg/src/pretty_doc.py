@@ -1,9 +1,8 @@
 from __future__ import annotations
 from array import array
-from typing import (Any, List, TypeVar, Generic, Callable)
+from typing import (Any, List, TypeVar, Optional, Generic, Callable)
 from ..fable_modules.fable_library.array import (take, concat as concat_1, append, last, head, skip, equals_with)
 from ..fable_modules.fable_library.list import (empty as empty_1, cons, FSharpList, is_empty, tail, head as head_1)
-from ..fable_modules.fable_library.option import Option
 from ..fable_modules.fable_library.reflection import (TypeInfo, list_type, int32_type, string_type, union_type, class_type, record_type)
 from ..fable_modules.fable_library.seq import (map, to_list)
 from ..fable_modules.fable_library.string import replicate
@@ -113,13 +112,13 @@ def compile_to_prims(doc: Doc) -> List[List[DocPrimitive]]:
     
     else: 
         match_value : List[List[DocPrimitive]] = compile_to_prims(doc.fields[0])
-        def arrow_5(x: List[DocPrimitive], y: List[DocPrimitive], doc: Doc=doc) -> bool:
-            def arrow_4(x_1: DocPrimitive, y_1: DocPrimitive) -> bool:
+        def arrow_4(x: List[DocPrimitive], y: List[DocPrimitive], doc: Doc=doc) -> bool:
+            def arrow_3(x_1: DocPrimitive, y_1: DocPrimitive) -> bool:
                 return equals(x_1, y_1)
             
-            return equals_with(arrow_4, x, y)
+            return equals_with(arrow_3, x, y)
         
-        if len(match_value) == 0 if (not equals_with(arrow_5, match_value, None)) else (False):
+        if len(match_value) == 0 if (not equals_with(arrow_4, match_value, None)) else (False):
             return [[DocPrimitive(4)]]
         
         else: 
@@ -135,18 +134,18 @@ def compile_to_prims(doc: Doc) -> List[List[DocPrimitive]]:
     
 
 
-def expr_8(gen0: TypeInfo) -> TypeInfo:
+def expr_5(gen0: TypeInfo) -> TypeInfo:
     return class_type("FablePykg.PrettyDoc.Stack`1", [gen0], Stack_1)
 
 
 class Stack_1(Generic[_A]):
-    def __init__(self, init: Option[IEnumerable[Any]]=None) -> None:
+    def __init__(self, init: Optional[IEnumerable[_A]]=None) -> None:
         self._content = to_list(init) if (init is not None) else (empty_1())
     
 
-Stack_1_reflection = expr_8
+Stack_1_reflection = expr_5
 
-def Stack_1__ctor_Z5E7FEA67(init: Option[IEnumerable[Any]]=None) -> Stack_1[_A]:
+def Stack_1__ctor_Z5E7FEA67(init: Optional[IEnumerable[_A]]=None) -> Stack_1[_A]:
     return Stack_1(init)
 
 
@@ -175,7 +174,7 @@ def Stack_1__get_Last(__: Stack_1[_A]) -> _A:
     
 
 
-def expr_9() -> TypeInfo:
+def expr_6() -> TypeInfo:
     return record_type("FablePykg.PrettyDoc.render_options", [], render_options, lambda: [["expected_line_width", int32_type]])
 
 
@@ -185,7 +184,7 @@ class render_options(Record):
         self.expected_line_width = expected_line_width or 0
     
 
-render_options_reflection = expr_9
+render_options_reflection = expr_6
 
 default_render_options : render_options = render_options(40)
 
@@ -243,11 +242,11 @@ def render(opts: render_options, setences: List[List[DocPrimitive]], write: Call
 
 
 def pretty(s: Any=None) -> Doc:
-    def arrow_10(s: __A=s) -> str:
+    def arrow_11(s: __A=s) -> str:
         copy_of_struct : __A = s
         return to_string(copy_of_struct)
     
-    return Doc(4, arrow_10())
+    return Doc(4, arrow_11())
 
 
 def seg(s: str) -> Doc:
@@ -346,10 +345,10 @@ def separray(sep: Doc, arr: List[Doc]) -> Doc:
 
 def show_doc(opts: render_options, doc: Doc) -> str:
     sb : Any = StringBuilder__ctor()
-    def arrow_11(x: str, opts: render_options=opts, doc: Doc=doc) -> None:
+    def arrow_13(x: str, opts: render_options=opts, doc: Doc=doc) -> None:
         ignore(StringBuilder__Append_Z721C83C5(sb, x))
     
-    render(opts, compile_to_prims(doc), arrow_11)
+    render(opts, compile_to_prims(doc), arrow_13)
     return to_string(sb)
 
 

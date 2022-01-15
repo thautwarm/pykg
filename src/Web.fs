@@ -19,10 +19,30 @@ let request_github_package_versions (repo_name: string): async<array<version>> =
 let request_github_package_with_tag (repo_name: string) (tag: version): async<project> = nativeOnly
 
 
-let find_all_deps (proj: project) =
-    for (Commented(_, each)) in proj.deps do
-        match each with
-        | GitHub(repo, specifiers) ->
-            failwith ""
-        failwith ""
+// let find_all_deps (proj: project) =
+//     let mutable github_deps = Map.ofArray [|
+//         proj.name.uncomment, Set.singleton (
+//                 mkSpecifier EQ proj.version.uncomment)
+//     |]
+//     let mutable pypi_deps = Map.empty
+//     let mutable local_deps = Map.empty
+    
+//     let deps = [| for (Commented(_, each)) in proj.deps do yield each |]
+
+//     for each in deps do
+//         match each with
+//         | GitHub(repo, specifiers) ->
+//             match Map.tryFind repo github_deps with
+//             | None ->
+//                 request_github_package_versions repo
+//                 github_deps <- 
+//                     github_deps
+//                     |>  Map.add repo (Set.ofArray specifiers.uncomment)
+//             | Some set ->
+//                 github_deps <- 
+//                     github_deps
+//                     |>  Map.add repo (Set.union set <| Set.ofArray specifiers.uncomment)
+                        
+//             failwith ""
+//         failwith ""
     

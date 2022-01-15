@@ -48,7 +48,7 @@ type Requirement(s: string) =
     let _req = _req_cls.Create s
     member this.specifier = _req.specifier
     member this.name = _req.name
-    
+
 type Pkg = {
     requires_dist: string list
 }

@@ -1,11 +1,11 @@
 from __future__ import annotations
-from typing import (Any, List, Tuple, Callable, TypeVar, Generic)
+from typing import (Any, List, Tuple, Callable, TypeVar, Generic, Optional)
 from ..fable_modules.fable_library.array import (contains, initialize, map, fill, find_index, find as find_1, map_indexed)
 from ..fable_modules.fable_library.decimal import (Decimal, to_number)
 from ..fable_modules.fable_library.double import parse as parse_1
 from ..fable_modules.fable_library.list import (FSharpList, is_empty, head, tail, empty, cons, map as map_1)
 from ..fable_modules.fable_library.long import (parse, equals, from_bits, to_int, from_value, from_integer)
-from ..fable_modules.fable_library.option import (some, Option, value as value_29)
+from ..fable_modules.fable_library.option import (some, value as value_29)
 from ..fable_modules.fable_library.reflection import (TypeInfo, class_type, float64_type, bool_type, string_type, array_type, tuple_type, union_type, int8_type, int16_type, int32_type, char_type, unit_type, is_array, get_element_type, uint32_type, uint8_type, uint16_type, is_generic_type, equals as equals_1, get_generic_type_definition, obj_type, option_type, get_generics, list_type, is_record, name, get_record_elements, make_record, is_tuple, get_tuple_elements, make_tuple, is_union, get_union_cases, get_union_case_fields, make_union, get_record_field, get_tuple_fields, get_union_fields)
 from ..fable_modules.fable_library.seq import (find, map as map_2)
 from ..fable_modules.fable_library.string import (to_text, interpolate, join)
@@ -19,7 +19,7 @@ __A = TypeVar("__A")
 
 _B = TypeVar("_B")
 
-def expr_12() -> TypeInfo:
+def expr_23() -> TypeInfo:
     return union_type("AJson.Json", [], Json, lambda: [[["Item", class_type("System.Int64")]], [["Item", float64_type]], [["Item", bool_type]], [["Item", string_type]], [], [["Item", array_type(Json_reflection())]], [["Item", array_type(tuple_type(string_type, Json_reflection()))]]])
 
 
@@ -34,7 +34,7 @@ class Json(Union):
         return ["JInt", "JFloat", "JBool", "JStr", "JNull", "JList", "JDict"]
     
 
-Json_reflection = expr_12
+Json_reflection = expr_23
 
 def Json__get_kind(this: Json) -> str:
     if this.tag == 1:
@@ -62,7 +62,7 @@ def Json__get_kind(this: Json) -> str:
 
 def Parsec_pChar_(c: str) -> Callable[[int, str], Tuple[int, None]]:
     def apply(i: int, c: str=c) -> Callable[[str], Tuple[int, None]]:
-        def arrow_13(s: str, i: int=i) -> Tuple[int, None]:
+        def arrow_24(s: str, i: int=i) -> Tuple[int, None]:
             if True if (i >= len(s)) else (s[i] != c):
                 raise Exception("unexpected match")
             
@@ -70,14 +70,14 @@ def Parsec_pChar_(c: str) -> Callable[[int, str], Tuple[int, None]]:
                 return (i + 1, None)
             
         
-        return arrow_13
+        return arrow_24
     
     return apply
 
 
 def Parsec_pStr_(pat: str) -> Callable[[int, str], Tuple[int, None]]:
     def apply(i: int, pat: str=pat) -> Callable[[str], Tuple[int, None]]:
-        def arrow_14(s: str, i: int=i) -> Tuple[int, None]:
+        def arrow_25(s: str, i: int=i) -> Tuple[int, None]:
             if True if ((i + len(pat)) > len(s)) else (s[i:((i + len(pat)) - 1) + 1] != pat):
                 raise Exception("unexpected match")
             
@@ -85,14 +85,14 @@ def Parsec_pStr_(pat: str) -> Callable[[int, str], Tuple[int, None]]:
                 return (i + len(pat), None)
             
         
-        return arrow_14
+        return arrow_25
     
     return apply
 
 
 def Parsec_pChar(c: str) -> Callable[[int, str], Tuple[int, str]]:
     def apply(i: int, c: str=c) -> Callable[[str], Tuple[int, str]]:
-        def arrow_15(s: str, i: int=i) -> Tuple[int, str]:
+        def arrow_26(s: str, i: int=i) -> Tuple[int, str]:
             if True if (i >= len(s)) else (s[i] != c):
                 raise Exception("unexpected match")
             
@@ -100,34 +100,34 @@ def Parsec_pChar(c: str) -> Callable[[int, str], Tuple[int, str]]:
                 return (i + 1, c)
             
         
-        return arrow_15
+        return arrow_26
     
     return apply
 
 
 def Parsec_pCharset_(cs: List[str]) -> Callable[[int, str], Tuple[int, None]]:
     def apply(i: int, cs: List[str]=cs) -> Callable[[str], Tuple[int, None]]:
-        def arrow_19(s: str, i: int=i) -> Tuple[int, None]:
+        def arrow_30(s: str, i: int=i) -> Tuple[int, None]:
             if i >= len(s):
                 raise Exception("unexpected match")
             
             else: 
-                class ObjectExpr18:
+                class ObjectExpr29:
                     @property
                     def Equals(self) -> Any:
-                        def arrow_16(x: str, y: str) -> bool:
+                        def arrow_27(x: str, y: str) -> bool:
                             return x == y
                         
-                        return arrow_16
+                        return arrow_27
                     
                     @property
                     def GetHashCode(self) -> Any:
-                        def arrow_17(x: str) -> int:
+                        def arrow_28(x: str) -> int:
                             return string_hash(x)
                         
-                        return arrow_17
+                        return arrow_28
                     
-                if contains(s[i], cs, ObjectExpr18()):
+                if contains(s[i], cs, ObjectExpr29()):
                     return (i + 1, None)
                 
                 else: 
@@ -135,34 +135,34 @@ def Parsec_pCharset_(cs: List[str]) -> Callable[[int, str], Tuple[int, None]]:
                 
             
         
-        return arrow_19
+        return arrow_30
     
     return apply
 
 
 def Parsec_pCharset(cs: List[str]) -> Callable[[int, str], Tuple[int, str]]:
     def apply(i: int, cs: List[str]=cs) -> Callable[[str], Tuple[int, str]]:
-        def arrow_23(s: str, i: int=i) -> Tuple[int, str]:
+        def arrow_34(s: str, i: int=i) -> Tuple[int, str]:
             if i >= len(s):
                 raise Exception("unexpected match")
             
             else: 
-                class ObjectExpr22:
+                class ObjectExpr33:
                     @property
                     def Equals(self) -> Any:
-                        def arrow_20(x: str, y: str) -> bool:
+                        def arrow_31(x: str, y: str) -> bool:
                             return x == y
                         
-                        return arrow_20
+                        return arrow_31
                     
                     @property
                     def GetHashCode(self) -> Any:
-                        def arrow_21(x: str) -> int:
+                        def arrow_32(x: str) -> int:
                             return string_hash(x)
                         
-                        return arrow_21
+                        return arrow_32
                     
-                if contains(s[i], cs, ObjectExpr22()):
+                if contains(s[i], cs, ObjectExpr33()):
                     return (i + 1, s[i])
                 
                 else: 
@@ -170,24 +170,24 @@ def Parsec_pCharset(cs: List[str]) -> Callable[[int, str], Tuple[int, str]]:
                 
             
         
-        return arrow_23
+        return arrow_34
     
     return apply
 
 
 def Parsec_pIgnore(p: Callable[[int, str], Tuple[int, _A]]) -> Callable[[int, str], Tuple[int, None]]:
     def apply(i: int, p: Callable[[int, str], Tuple[int, _A]]=p) -> Callable[[str], Tuple[int, None]]:
-        def arrow_24(s: str, i: int=i) -> Tuple[int, None]:
+        def arrow_35(s: str, i: int=i) -> Tuple[int, None]:
             return (p(i, s)[0], None)
         
-        return arrow_24
+        return arrow_35
     
     return apply
 
 
 def Parsec_pSeq_(ps: FSharpList[Callable[[int, str], Tuple[int, None]]]) -> Callable[[int, str], Tuple[int, None]]:
     def apply(i: int, ps: FSharpList[Callable[[int, str], Tuple[int, None]]]=ps) -> Callable[[str], Tuple[int, None]]:
-        def arrow_25(s: str, i: int=i) -> Tuple[int, None]:
+        def arrow_36(s: str, i: int=i) -> Tuple[int, None]:
             def loop(i_1_mut: int, ps_1_mut: FSharpList[Callable[[int, str], Tuple[int, __A]]]) -> Tuple[int, None]:
                 while True:
                     (i_1, ps_1) = (i_1_mut, ps_1_mut)
@@ -206,14 +206,14 @@ def Parsec_pSeq_(ps: FSharpList[Callable[[int, str], Tuple[int, None]]]) -> Call
             
             return loop(i, ps)
         
-        return arrow_25
+        return arrow_36
     
     return apply
 
 
 def Parsec_pSepRep(sep: Callable[[int, str], Tuple[int, bool]], p: Callable[[int, str], Tuple[int, _A]]) -> Callable[[int, str], Tuple[int, List[_A]]]:
     def apply(i: int, sep: Callable[[int, str], Tuple[int, bool]]=sep, p: Callable[[int, str], Tuple[int, _A]]=p) -> Callable[[str], Tuple[int, List[_A]]]:
-        def arrow_26(s: str, i: int=i) -> Tuple[int, List[_A]]:
+        def arrow_37(s: str, i: int=i) -> Tuple[int, List[_A]]:
             res : List[_A] = []
             def loop(i_1_mut: int) -> Tuple[int, List[_A]]:
                 while True:
@@ -238,13 +238,13 @@ def Parsec_pSepRep(sep: Callable[[int, str], Tuple[int, bool]], p: Callable[[int
             
             return loop(i)
         
-        return arrow_26
+        return arrow_37
     
     return apply
 
 
 def apply(i: int) -> Callable[[str], Tuple[int, None]]:
-    def arrow_27(s: str, i: int=i) -> Tuple[int, None]:
+    def arrow_38(s: str, i: int=i) -> Tuple[int, None]:
         def loop(i_1_mut: int) -> Tuple[int, None]:
             while True:
                 (i_1,) = (i_1_mut,)
@@ -281,37 +281,37 @@ def apply(i: int) -> Callable[[str], Tuple[int, None]]:
         
         return loop(i)
     
-    return arrow_27
+    return arrow_38
 
 
 Parsec_pSpc : Callable[[int, str], Tuple[int, None]] = apply
 
 def Parsec_allowSPC(p: Callable[[int, str], Tuple[int, _A]]) -> Callable[[int, str], Tuple[int, _A]]:
     def apply(i: int, p: Callable[[int, str], Tuple[int, _A]]=p) -> Callable[[str], Tuple[int, _A]]:
-        def arrow_28(s: str, i: int=i) -> Tuple[int, _A]:
+        def arrow_39(s: str, i: int=i) -> Tuple[int, _A]:
             pattern_input_1 : Tuple[int, _A] = p(Parsec_pSpc(i)(s)[0], s)
             return (Parsec_pSpc(pattern_input_1[0])(s)[0], pattern_input_1[1])
         
-        return arrow_28
+        return arrow_39
     
     return apply
 
 
 def Parsec_la1(dispatch: Callable[[str, int, str], Tuple[int, _A]]) -> Callable[[int, str], Tuple[int, _A]]:
     def apply(i: int, dispatch: Callable[[str, int, str], Tuple[int, _A]]=dispatch) -> Callable[[str], Tuple[int, _A]]:
-        def arrow_29(s: str, i: int=i) -> Tuple[int, _A]:
+        def arrow_40(s: str, i: int=i) -> Tuple[int, _A]:
             if i >= len(s):
                 raise Exception("unexpected match")
             
             return dispatch(s[i], i, s)
         
-        return arrow_29
+        return arrow_40
     
     return apply
 
 
 def apply(i: int) -> Callable[[str], Tuple[int, str]]:
-    def arrow_31(s: str, i: int=i) -> Tuple[int, str]:
+    def arrow_42(s: str, i: int=i) -> Tuple[int, str]:
         if i >= len(s):
             raise Exception("unexpected match")
         
@@ -337,11 +337,11 @@ def apply(i: int) -> Callable[[str], Tuple[int, str]]:
                         pattern_matching_result = 0
                     
                     else: 
-                        def arrow_30(j: int=j) -> bool:
+                        def arrow_41(j: int=j) -> bool:
                             c : str = match_value
                             return c >= "0" if (c <= "9") else (False)
                         
-                        if arrow_30():
+                        if arrow_41():
                             pattern_matching_result = 1
                         
                         else: 
@@ -365,13 +365,13 @@ def apply(i: int) -> Callable[[str], Tuple[int, str]]:
         i_1 : int = loop(i) or 0
         return (i_1, s[i:(i_1 - 1) + 1])
     
-    return arrow_31
+    return arrow_42
 
 
 Parsec_pNumber : Callable[[int, str], Tuple[int, str]] = apply
 
 def apply(i: int) -> Callable[[str], Tuple[int, str]]:
-    def arrow_32(s: str, i: int=i) -> Tuple[int, str]:
+    def arrow_43(s: str, i: int=i) -> Tuple[int, str]:
         if True if (i >= len(s)) else (s[i] != "\""):
             raise Exception("incomplete parsing for string")
         
@@ -428,28 +428,28 @@ def apply(i: int) -> Callable[[str], Tuple[int, str]]:
             raise Exception("incomplete string")
         
     
-    return arrow_32
+    return arrow_43
 
 
 Parsec_pStr : Callable[[int, str], Tuple[int, str]] = apply
 
 def Parsec_pMap(f: Callable[[_A], _B], p: Callable[[int, str], Tuple[int, _A]]) -> Callable[[int, str], Tuple[int, _B]]:
     def apply(i: int, f: Callable[[_A], _B]=f, p: Callable[[int, str], Tuple[int, _A]]=p) -> Callable[[str], Tuple[int, _B]]:
-        def arrow_33(s: str, i: int=i) -> Tuple[int, _B]:
+        def arrow_44(s: str, i: int=i) -> Tuple[int, _B]:
             pattern_input : Tuple[int, _A] = p(i, s)
             return (pattern_input[0], f(pattern_input[1]))
         
-        return arrow_33
+        return arrow_44
     
     return apply
 
 
 def Parsec_pRef(p: FSharpRef[Callable[[int, str], Tuple[int, _A]]]) -> Callable[[int, str], Tuple[int, _A]]:
     def apply(i: int, p: FSharpRef[Callable[[int, str], Tuple[int, _A]]]=p) -> Callable[[str], Tuple[int, _A]]:
-        def arrow_36(s: str, i: int=i) -> Tuple[int, _A]:
+        def arrow_45(s: str, i: int=i) -> Tuple[int, _A]:
             return p.contents(i)(s)
         
-        return arrow_36
+        return arrow_45
     
     return apply
 
@@ -495,7 +495,7 @@ def f(s: str) -> float:
 Parsec_Json_jFloat : Callable[[int, str], Tuple[int, _B]] = Parsec_pMap(f, uncurry(2, Parsec_pNumber))
 
 def apply(i: int) -> Callable[[str], Tuple[int, Json]]:
-    def arrow_38(s: str, i: int=i) -> Tuple[int, Json]:
+    def arrow_47(s: str, i: int=i) -> Tuple[int, Json]:
         if i >= len(s):
             raise Exception("unexpected match")
         
@@ -522,11 +522,11 @@ def apply(i: int) -> Callable[[str], Tuple[int, Json]]:
                         pattern_matching_result = 1
                     
                     else: 
-                        def arrow_37(isfloat: bool=isfloat, j: int=j) -> bool:
+                        def arrow_46(isfloat: bool=isfloat, j: int=j) -> bool:
                             c : str = match_value
                             return c >= "0" if (c <= "9") else (False)
                         
-                        if arrow_37():
+                        if arrow_46():
                             pattern_matching_result = 2
                         
                         else: 
@@ -558,18 +558,18 @@ def apply(i: int) -> Callable[[str], Tuple[int, Json]]:
         i_1 : int = pattern_input[1] or 0
         return (i_1, Json(1, parse_1(s[start:(i_1 - 1) + 1])) if (pattern_input[0]) else (Json(0, parse(s[start:(i_1 - 1) + 1], 511, False, 64))))
     
-    return arrow_38
+    return arrow_47
 
 
 Parsec_Json_jNumber : Callable[[int, str], Tuple[int, Json]] = apply
 
-def f(_unit: Any=None) -> bool:
+def f(__unit: Any=None) -> bool:
     return True
 
 
 Parsec_Json_jTrue : Callable[[int, str], Tuple[int, _B]] = Parsec_pMap(f, uncurry(2, Parsec_pStr_("true")))
 
-def f(_unit: Any=None) -> bool:
+def f(__unit: Any=None) -> bool:
     return True
 
 
@@ -587,7 +587,7 @@ Parsec_Json_refList : FSharpRef[Callable[[int, str], Tuple[int, List[Json]]]] = 
 
 Parsec_Json_jList : Callable[[int, str], Tuple[int, _A]] = Parsec_pRef(Parsec_Json_refList)
 
-def arrow_40(_arg1: str) -> Callable[[int, str], Tuple[int, Json]]:
+def arrow_49(_arg1: str) -> Callable[[int, str], Tuple[int, Json]]:
     if _arg1 == "-":
         return Parsec_Json_jNumber
     
@@ -604,7 +604,7 @@ def arrow_40(_arg1: str) -> Callable[[int, str], Tuple[int, Json]]:
         return Parsec_pMap(f_3, uncurry(2, Parsec_Json_jFalse))
     
     elif _arg1 == "n":
-        def f_4(_unit: Any=None) -> Json:
+        def f_4(__unit: Any=None) -> Json:
             return Json(4)
         
         return Parsec_pMap(f_4, uncurry(2, Parsec_Json_jNull))
@@ -622,11 +622,11 @@ def arrow_40(_arg1: str) -> Callable[[int, str], Tuple[int, Json]]:
         return Parsec_pMap(f_1, uncurry(2, Parsec_Json_jObject))
     
     else: 
-        def arrow_39(_unit: Any=None) -> bool:
+        def arrow_48(__unit: Any=None) -> bool:
             c : str = _arg1
             return c <= "9" if (c >= "0") else (False)
         
-        if arrow_39():
+        if arrow_48():
             return Parsec_Json_jNumber
         
         elif _arg1 == "\"":
@@ -641,10 +641,10 @@ def arrow_40(_arg1: str) -> Callable[[int, str], Tuple[int, Json]]:
     
 
 
-Parsec_Json_json : Callable[[int, str], Tuple[int, _A]] = Parsec_la1(uncurry(3, arrow_40))
+Parsec_Json_json : Callable[[int, str], Tuple[int, _A]] = Parsec_la1(uncurry(3, arrow_49))
 
-def arrow_42(i: int) -> Callable[[str], Tuple[int, List[Any]]]:
-    def arrow_41(s: str) -> Tuple[int, List[Any]]:
+def arrow_51(i: int) -> Callable[[str], Tuple[int, List[Any]]]:
+    def arrow_50(s: str) -> Tuple[int, List[Any]]:
         i_2 : int = Parsec_pSpc(Parsec_pChar_("{")(i)(s)[0])(s)[0] or 0
         if i_2 >= len(s):
             raise Exception("incomplete object")
@@ -657,23 +657,23 @@ def arrow_42(i: int) -> Callable[[str], Tuple[int, List[Any]]]:
         
         return (i_2 + 1, []) if (s[i_2] == "}") else (Parsec_pSepRep(uncurry(2, Parsec_Json_pDictSep), each)(i_2)(s))
     
-    return arrow_41
+    return arrow_50
 
 
-Parsec_Json_refObject.contents = arrow_42
+Parsec_Json_refObject.contents = arrow_51
 
-def arrow_44(i: int) -> Callable[[str], Tuple[int, List[Any]]]:
-    def arrow_43(s: str) -> Tuple[int, List[Any]]:
+def arrow_53(i: int) -> Callable[[str], Tuple[int, List[Any]]]:
+    def arrow_52(s: str) -> Tuple[int, List[Any]]:
         i_2 : int = Parsec_pSpc(Parsec_pChar_("[")(i)(s)[0])(s)[0] or 0
         if i_2 >= len(s):
             raise Exception("incomplete list")
         
         return (i_2 + 1, []) if (s[i_2] == "]") else (Parsec_pSepRep(uncurry(2, Parsec_Json_pListSep), uncurry(2, Parsec_allowSPC(uncurry(2, Parsec_Json_json))))(i_2)(s))
     
-    return arrow_43
+    return arrow_52
 
 
-Parsec_Json_refList.contents = arrow_44
+Parsec_Json_refList.contents = arrow_53
 
 def parse_json(s: str) -> Json:
     pattern_input : Tuple[int, Json] = Parsec_allowSPC(uncurry(2, Parsec_Json_json))(0)(s)
@@ -772,7 +772,7 @@ ADT_TAG : str = "_TAG"
 
 ADT_VALS : str = "_VALUES"
 
-def expr_45(gen0: TypeInfo) -> TypeInfo:
+def expr_54(gen0: TypeInfo) -> TypeInfo:
     return union_type("AJson.evidence`1", [gen0], evidence_1, lambda: [[]])
 
 
@@ -787,7 +787,7 @@ class evidence_1(Union, Generic[_A]):
         return ["Evidence"]
     
 
-evidence_1_reflection = expr_45
+evidence_1_reflection = expr_54
 
 def obj_from_json(t: Any, data: Json) -> Any:
     if int8_type is t:
@@ -840,100 +840,100 @@ def obj_from_json(t: Any, data: Json) -> Any:
             raise Exception(to_text(interpolate("convert %P() to %P()", [Json__get_kind(data), t])))
         
         if eltype is int32_type:
-            def arrow_46(i: int, t: Any=t, data: Json=data) -> int:
+            def arrow_55(i: int, t: Any=t, data: Json=data) -> int:
                 return int(to_int(int64from_json(seq_1[i])))
             
-            return initialize(len(seq_1), arrow_46, Int32Array)
+            return initialize(len(seq_1), arrow_55, Int32Array)
         
         elif eltype == class_type("System.Int64"):
-            def arrow_47(i_1: int, t: Any=t, data: Json=data) -> Any:
+            def arrow_56(i_1: int, t: Any=t, data: Json=data) -> Any:
                 return int64from_json(seq_1[i_1])
-            
-            return initialize(len(seq_1), arrow_47, None)
-        
-        elif eltype is int16_type:
-            def arrow_48(i_2: int, t: Any=t, data: Json=data) -> int:
-                return (int(to_int(int64from_json(seq_1[i_2]))) + 0x8000 & 0xFFFF) - 0x8000
-            
-            return initialize(len(seq_1), arrow_48, Int16Array)
-        
-        elif eltype is int8_type:
-            def arrow_49(i_3: int, t: Any=t, data: Json=data) -> int:
-                return (int(to_int(int64from_json(seq_1[i_3]))) + 0x80 & 0xFF) - 0x80
-            
-            return initialize(len(seq_1), arrow_49, Int8Array)
-        
-        elif eltype is uint32_type:
-            def arrow_50(i_4: int, t: Any=t, data: Json=data) -> int:
-                return int(to_int(int64from_json(seq_1[i_4]))+0x100000000 if to_int(int64from_json(seq_1[i_4])) < 0 else to_int(int64from_json(seq_1[i_4])))
-            
-            return initialize(len(seq_1), arrow_50, Uint32Array)
-        
-        elif eltype == class_type("System.UInt64"):
-            def arrow_51(i_5: int, t: Any=t, data: Json=data) -> Any:
-                return from_value(int64from_json(seq_1[i_5]), True)
-            
-            return initialize(len(seq_1), arrow_51, None)
-        
-        elif eltype is uint8_type:
-            def arrow_52(i_6: int, t: Any=t, data: Json=data) -> int:
-                return int(to_int(int64from_json(seq_1[i_6]))+0x100 if to_int(int64from_json(seq_1[i_6])) < 0 else to_int(int64from_json(seq_1[i_6]))) & 0xFF
-            
-            return initialize(len(seq_1), arrow_52, Uint8Array)
-        
-        elif eltype is uint16_type:
-            def arrow_53(i_7: int, t: Any=t, data: Json=data) -> int:
-                return int(to_int(int64from_json(seq_1[i_7]))+0x10000 if to_int(int64from_json(seq_1[i_7])) < 0 else to_int(int64from_json(seq_1[i_7]))) & 0xFFFF
-            
-            return initialize(len(seq_1), arrow_53, Uint16Array)
-        
-        elif eltype is float64_type:
-            def arrow_54(i_8: int, t: Any=t, data: Json=data) -> float:
-                return double_from_json(seq_1[i_8])
-            
-            return initialize(len(seq_1), arrow_54, Float64Array)
-        
-        elif eltype is float64_type:
-            def arrow_55(i_9: int, t: Any=t, data: Json=data) -> float:
-                return double_from_json(seq_1[i_9])
-            
-            return initialize(len(seq_1), arrow_55, Float64Array)
-        
-        elif eltype == class_type("System.Decimal"):
-            def arrow_56(i_10: int, t: Any=t, data: Json=data) -> Any:
-                return Decimal(double_from_json(seq_1[i_10]))
             
             return initialize(len(seq_1), arrow_56, None)
         
-        elif eltype is string_type:
-            def arrow_57(i_11: int, t: Any=t, data: Json=data) -> str:
-                return string_from_json(seq_1[i_11])
+        elif eltype is int16_type:
+            def arrow_57(i_2: int, t: Any=t, data: Json=data) -> int:
+                return (int(to_int(int64from_json(seq_1[i_2]))) + 0x8000 & 0xFFFF) - 0x8000
             
-            return initialize(len(seq_1), arrow_57, None)
+            return initialize(len(seq_1), arrow_57, Int16Array)
         
-        elif eltype is bool_type:
-            def arrow_58(i_12: int, t: Any=t, data: Json=data) -> bool:
-                return bool_from_json(seq_1[i_12])
+        elif eltype is int8_type:
+            def arrow_58(i_3: int, t: Any=t, data: Json=data) -> int:
+                return (int(to_int(int64from_json(seq_1[i_3]))) + 0x80 & 0xFF) - 0x80
             
-            return initialize(len(seq_1), arrow_58, None)
+            return initialize(len(seq_1), arrow_58, Int8Array)
         
-        elif eltype is unit_type:
-            def arrow_59(i_13: int, t: Any=t, data: Json=data) -> None:
-                unit_from_json(seq_1[i_13])
+        elif eltype is uint32_type:
+            def arrow_59(i_4: int, t: Any=t, data: Json=data) -> int:
+                return int(to_int(int64from_json(seq_1[i_4]))+0x100000000 if to_int(int64from_json(seq_1[i_4])) < 0 else to_int(int64from_json(seq_1[i_4])))
             
-            return initialize(len(seq_1), arrow_59, None)
+            return initialize(len(seq_1), arrow_59, Uint32Array)
         
-        elif eltype is char_type:
-            def arrow_60(i_14: int, t: Any=t, data: Json=data) -> str:
-                return char_from_json(seq_1[i_14])
+        elif eltype == class_type("System.UInt64"):
+            def arrow_60(i_5: int, t: Any=t, data: Json=data) -> Any:
+                return from_value(int64from_json(seq_1[i_5]), True)
             
             return initialize(len(seq_1), arrow_60, None)
         
+        elif eltype is uint8_type:
+            def arrow_61(i_6: int, t: Any=t, data: Json=data) -> int:
+                return int(to_int(int64from_json(seq_1[i_6]))+0x100 if to_int(int64from_json(seq_1[i_6])) < 0 else to_int(int64from_json(seq_1[i_6]))) & 0xFF
+            
+            return initialize(len(seq_1), arrow_61, Uint8Array)
+        
+        elif eltype is uint16_type:
+            def arrow_62(i_7: int, t: Any=t, data: Json=data) -> int:
+                return int(to_int(int64from_json(seq_1[i_7]))+0x10000 if to_int(int64from_json(seq_1[i_7])) < 0 else to_int(int64from_json(seq_1[i_7]))) & 0xFFFF
+            
+            return initialize(len(seq_1), arrow_62, Uint16Array)
+        
+        elif eltype is float64_type:
+            def arrow_63(i_8: int, t: Any=t, data: Json=data) -> float:
+                return double_from_json(seq_1[i_8])
+            
+            return initialize(len(seq_1), arrow_63, Float64Array)
+        
+        elif eltype is float64_type:
+            def arrow_64(i_9: int, t: Any=t, data: Json=data) -> float:
+                return double_from_json(seq_1[i_9])
+            
+            return initialize(len(seq_1), arrow_64, Float64Array)
+        
+        elif eltype == class_type("System.Decimal"):
+            def arrow_65(i_10: int, t: Any=t, data: Json=data) -> Any:
+                return Decimal(double_from_json(seq_1[i_10]))
+            
+            return initialize(len(seq_1), arrow_65, None)
+        
+        elif eltype is string_type:
+            def arrow_66(i_11: int, t: Any=t, data: Json=data) -> str:
+                return string_from_json(seq_1[i_11])
+            
+            return initialize(len(seq_1), arrow_66, None)
+        
+        elif eltype is bool_type:
+            def arrow_67(i_12: int, t: Any=t, data: Json=data) -> bool:
+                return bool_from_json(seq_1[i_12])
+            
+            return initialize(len(seq_1), arrow_67, None)
+        
+        elif eltype is unit_type:
+            def arrow_68(i_13: int, t: Any=t, data: Json=data) -> None:
+                unit_from_json(seq_1[i_13])
+            
+            return initialize(len(seq_1), arrow_68, None)
+        
+        elif eltype is char_type:
+            def arrow_69(i_14: int, t: Any=t, data: Json=data) -> str:
+                return char_from_json(seq_1[i_14])
+            
+            return initialize(len(seq_1), arrow_69, None)
+        
         else: 
-            def arrow_61(i_15: int, t: Any=t, data: Json=data) -> Any:
+            def arrow_70(i_15: int, t: Any=t, data: Json=data) -> Any:
                 return obj_from_json(eltype, seq_1[i_15])
             
-            return initialize(len(seq_1), arrow_61, None)
+            return initialize(len(seq_1), arrow_70, None)
         
     
     elif equals_1(get_generic_type_definition(t), option_type(obj_type)) if (is_generic_type(t)) else (False):
@@ -963,17 +963,17 @@ def obj_from_json(t: Any, data: Json) -> Any:
         
         fields : List[Tuple[str, Any]] = map(mapping, get_record_elements(t), None)
         arguments : List[Any] = fill([0] * len(fields), 0, len(fields), None)
-        def arrow_62(t: Any=t, data: Json=data) -> List[Tuple[str, Json]]:
+        def arrow_71(t: Any=t, data: Json=data) -> List[Tuple[str, Json]]:
             raise Exception(to_text(interpolate("convert %P() to %P()", [Json__get_kind(data), t])))
         
-        enumerator : Any = get_enumerator(data.fields[0] if (data.tag == 6) else (arrow_62()))
+        enumerator : Any = get_enumerator(data.fields[0] if (data.tag == 6) else (arrow_71()))
         try: 
             while enumerator.System_Collections_IEnumerator_MoveNext():
                 for_loop_var : Tuple[str, Json] = enumerator.System_Collections_Generic_IEnumerator_00601_get_Current()
-                def arrow_63(tupled_arg: Tuple[str, Any]) -> bool:
+                def arrow_72(tupled_arg: Tuple[str, Any]) -> bool:
                     return for_loop_var[0] == tupled_arg[0]
                 
-                i_17 : int = find_index(arrow_63, fields) or 0
+                i_17 : int = find_index(arrow_72, fields) or 0
                 pattern_input : Tuple[str, Any] = fields[i_17]
                 arguments[i_17] = obj_from_json(pattern_input[1], for_loop_var[1])
         
@@ -991,10 +991,10 @@ def obj_from_json(t: Any, data: Json) -> Any:
         else: 
             raise Exception(to_text(interpolate("convert %P() to %P()", [Json__get_kind(data), t])))
         
-        def arrow_64(i_18: int, t: Any=t, data: Json=data) -> Any:
+        def arrow_73(i_18: int, t: Any=t, data: Json=data) -> Any:
             return obj_from_json(eltypes[i_18], seq_5[i_18])
         
-        return make_tuple(initialize(len(seq_5), arrow_64, None), t)
+        return make_tuple(initialize(len(seq_5), arrow_73, None), t)
     
     elif is_union(t):
         pairs_3 : List[Tuple[str, Json]]
@@ -1004,14 +1004,14 @@ def obj_from_json(t: Any, data: Json) -> Any:
         else: 
             raise Exception(to_text(interpolate("convert %P() to %P()", [Json__get_kind(data), t])))
         
-        def arrow_65(tupled_arg_1: Tuple[str, Json], t: Any=t, data: Json=data) -> bool:
+        def arrow_74(tupled_arg_1: Tuple[str, Json], t: Any=t, data: Json=data) -> bool:
             return tupled_arg_1[0] == ADT_TAG
         
-        tag_1 : str = string_from_json(find(arrow_65, pairs_3)[1])
-        def arrow_66(tupled_arg_2: Tuple[str, Json], t: Any=t, data: Json=data) -> bool:
+        tag_1 : str = string_from_json(find(arrow_74, pairs_3)[1])
+        def arrow_75(tupled_arg_2: Tuple[str, Json], t: Any=t, data: Json=data) -> bool:
             return tupled_arg_2[0] == ADT_VALS
         
-        values : Json = find(arrow_66, pairs_3)[1]
+        values : Json = find(arrow_75, pairs_3)[1]
         def predicate(case: Any, t: Any=t, data: Json=data) -> bool:
             return name(case) == tag_1
         
@@ -1020,17 +1020,17 @@ def obj_from_json(t: Any, data: Json) -> Any:
             return f_1[1]
         
         fieldtypes : List[Any] = map(mapping_1, get_union_case_fields(case_1), None)
-        def arrow_68(t: Any=t, data: Json=data) -> List[Any]:
+        def arrow_77(t: Any=t, data: Json=data) -> List[Any]:
             values_1 : List[Json] = values.fields[0]
-            def arrow_67(i_19: int) -> Any:
+            def arrow_76(i_19: int) -> Any:
                 return obj_from_json(fieldtypes[i_19], values_1[i_19])
             
-            return initialize(len(values_1), arrow_67, None)
+            return initialize(len(values_1), arrow_76, None)
         
-        def arrow_69(t: Any=t, data: Json=data) -> List[Any]:
+        def arrow_78(t: Any=t, data: Json=data) -> List[Any]:
             raise Exception(to_text(interpolate("convert %P() to %P()", [Json__get_kind(data), t])))
         
-        return make_union(case_1, arrow_68() if (values.tag == 5) else (arrow_69()))
+        return make_union(case_1, arrow_77() if (values.tag == 5) else (arrow_78()))
     
     else: 
         raise Exception(to_text(interpolate("unsupported data type fromJson: %P()", [t])))
@@ -1174,7 +1174,7 @@ def obj_to_json(t_mut: Any, o_mut: Any) -> Json:
         
         elif equals_1(get_generic_type_definition(t), option_type(obj_type)) if (is_generic_type(t)) else (False):
             eltype_1 : Any = get_generics(t)[0]
-            match_value : Option[Any] = o
+            match_value : Optional[Any] = o
             if match_value is not None:
                 t_mut = eltype_1
                 o_mut = value_29(match_value)
@@ -1225,11 +1225,11 @@ def obj_to_json(t_mut: Any, o_mut: Any) -> Json:
 def escape_string(s: str) -> str:
     buf : Any = StringBuilder__ctor_Z524259A4(len(s))
     for i in range(0, (len(s) - 1) + 1, 1):
-        def arrow_70(s: str=s) -> Any:
+        def arrow_79(s: str=s) -> Any:
             c : str = s[i]
             return StringBuilder__Append_Z721C83C5(buf, "\\b") if (c == "\b") else (StringBuilder__Append_Z721C83C5(buf, "\\t") if (c == "\t") else (StringBuilder__Append_Z721C83C5(buf, "\\n") if (c == "\n") else (StringBuilder__Append_Z721C83C5(buf, "\\f") if (c == "\f") else (StringBuilder__Append_Z721C83C5(buf, "\\r") if (c == "\r") else (StringBuilder__Append_Z721C83C5(buf, "\\\"") if (c == "\"") else (StringBuilder__Append_Z721C83C5(buf, "\\\\") if (c == "\\") else (StringBuilder__Append_244C7CD6(buf, c))))))))
         
-        ignore(arrow_70())
+        ignore(arrow_79())
     return to_string(buf)
 
 
@@ -1252,16 +1252,16 @@ def serialize_json(x: Json) -> str:
         return "null"
     
     elif x.tag == 5:
-        def arrow_71(x_1: Json, x: Json=x) -> str:
+        def arrow_80(x_1: Json, x: Json=x) -> str:
             return serialize_json(x_1)
         
-        return ("[" + join(",", map_2(arrow_71, x.fields[0]))) + "]"
+        return ("[" + join(",", map_2(arrow_80, x.fields[0]))) + "]"
     
     elif x.tag == 6:
-        def arrow_72(tupled_arg: Tuple[str, Json], x: Json=x) -> str:
+        def arrow_81(tupled_arg: Tuple[str, Json], x: Json=x) -> str:
             return ((("\"" + escape_string(tupled_arg[0])) + "\"") + ":") + serialize_json(tupled_arg[1])
         
-        return ("{" + join(",", map_2(arrow_72, x.fields[0]))) + "}"
+        return ("{" + join(",", map_2(arrow_81, x.fields[0]))) + "}"
     
     else: 
         return int64_to_string(x.fields[0])

@@ -41,7 +41,7 @@
 
 
 
-start : component -> start_0
+start : _I_FORMAT_I_ version component -> start_0
 op : _I__J__J__I_ -> op_0
    | _I__H__J__I_ -> op_1
    | _I__K__I_ -> op_2
@@ -55,6 +55,8 @@ specifier : op version -> specifier_0
 specifier_set : specifier -> specifier_set_0
               | specifier_set _I__M__M__I_ specifier -> specifier_set_1
 comment : LINE_COMMENT -> comment_0
+id : _I_FORMAT_I_ -> id_0
+   | ID -> id_1
 list_o_component_p_ : component -> list_o_component_p__0
                     | list_o_component_p_ component -> list_o_component_p__1
 comp : EXP -> comp_0
@@ -64,13 +66,13 @@ comp : EXP -> comp_0
      | _I_NULL_I_ -> comp_4
      | version -> comp_5
      | specifier_set -> comp_6
-     | ID component -> comp_7
-     | ID _I__T__I_ list_o_component_p_ _I__V__I_ -> comp_8
-     | ID _I__T__I_ _I__V__I_ -> comp_9
+     | id component -> comp_7
+     | id _I__T__I_ list_o_component_p_ _I__V__I_ -> comp_8
+     | id _I__T__I_ _I__V__I_ -> comp_9
      | _I__N__I_ list_o_component_p_ _I__P__I_ -> comp_10
      | _I__N__I_ _I__P__I_ -> comp_11
 list_o_comment_p_ : comment -> list_o_comment_p__0
                   | list_o_comment_p_ comment -> list_o_comment_p__1
 component : comp -> component_0
           | list_o_comment_p_ comp -> component_1
-%declare _I__H__J__I_ _I__M__M__I_ _I__I__I_ _I__I__J__I_ _I__J__J__I_ _I__K__I_ _I__K__J__I_ _I__N__I_ _I__P__I_ _I__Q__I_ _I_FALSE_I_ _I_NULL_I_ _I_TRUE_I_ _I__T__I_ _I__V__I_ _I__W__I_ EXP ID LINE_COMMENT STR VERSION UNKNOWN
+%declare _I__H__J__I_ _I__M__M__I_ _I__I__I_ _I__I__J__I_ _I__J__J__I_ _I__K__I_ _I__K__J__I_ _I__N__I_ _I__P__I_ _I__Q__I_ _I_FALSE_I_ _I_FORMAT_I_ _I_NULL_I_ _I_TRUE_I_ _I__T__I_ _I__V__I_ _I__W__I_ EXP ID LINE_COMMENT STR VERSION UNKNOWN

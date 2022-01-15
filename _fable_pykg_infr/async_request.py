@@ -7,6 +7,11 @@ import types
 import io
 import time
 import ssl
+import typing
+
+if typing.TYPE_CHECKING:
+    from typing import TypeVar, Generator
+    _T = TypeVar('_T')
 
 
 # https://stackoverflow.com/questions/24728088/python-parse-http-response-string
@@ -20,7 +25,7 @@ Pending = None
 
 def parse_http_response(response_bytes: bytes | bytearray):
     source = FakeSocket(response_bytes)
-    response = HTTPResponse(source)
+    response = HTTPResponse(source)  # type: ignore
     response.begin()
     return response
 
@@ -109,11 +114,11 @@ def areadpage(url, timeout=10):
             chunk.extend(c)
             if chunk.endswith(b'\r\n\r\n'):
                 break
-        
+
         resp = parse_http_response(chunk)
         if resp.status != 200:
             return resp, b''
-    
+
         ios = io.BytesIO()
         while True:
             data = yield from aread_sock(ssl_sock, 1024, timeout - (time.time() - start_time))
@@ -174,7 +179,7 @@ def gather_with_limited_workers(gens: list, nworkers: int = 16):
     return results
 
 
-def run_many(gens: list):
+def run_many(gens: list[Generator[None, None, _T]]) -> list[_T]:
     results = []
     tasks = deque()
     for i in range(len(gens)):
