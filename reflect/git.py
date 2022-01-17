@@ -7,10 +7,12 @@ from .async_request import (
     run_many,
 )
 from dulwich.repo import MemoryRepo, Repo
-from dulwich.client import HttpGitClient
+from dulwich.client import HttpGitClient, HTTPUnauthorized
+from dulwich.errors import NotGitRepository
 from .classified_url import *
 from urllib.parse import urljoin
 from pathlib import Path
+from . import log
 
 try:
     from functools import cache
@@ -152,7 +154,12 @@ class Git:
         url = root + "/" + user_repo
         remote_repo = HttpGitClient(url)
         local_repo = MemoryRepo()
-        refs: dict[bytes, bytes] = remote_repo.fetch(url, local_repo).refs
+        try:
+            refs: dict[bytes, bytes] = remote_repo.fetch(url, local_repo).refs
+        except NotGitRepository:
+            raise NotGitRepository(f"{self.url!r} has invalid repo url: {url!r} is not git repo.")
+        except HTTPUnauthorized:
+            raise FileNotFoundError(f"Repo address {url!r} is not available, check if it's public or the name is incorrect.")
 
         stored_refs = GLOBAL_CACHE.get_refs(url)
         if _version_regex.match(branch):
@@ -188,6 +195,7 @@ class Git:
             def async_task(path: str):
                 resp, file = yield from self.areadfile(path)
                 if resp.status != 200:
+                    log.warn(f"{path} not found from {self.url}")
                     return path, None
                 return path, file.decode("utf-8")
 
@@ -239,6 +247,8 @@ class Git:
                     path_o.parent.mkdir(exist_ok=True, parents=True, mode=0o777)
                     with path_o.open("wb") as fr:
                         fr.write(file_content)
+                else:
+                    log.warn(f"{path} not found from {self.url}")
 
         NEED_UPDATE.append(update)
 
@@ -266,6 +276,8 @@ class Git:
                     path_o.parent.mkdir(exist_ok=True, parents=True, mode=0o777)
                     with path_o.open("wb") as fr:
                         fr.write(file_content)
+                else:
+                    log.warn(f"{path} not found from {self.url}")
 
             tasks = [async_task(path) for path in self.local_tracked_files]
             yield from gather_with_limited_workers(tasks)

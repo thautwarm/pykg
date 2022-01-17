@@ -3,10 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import urlparse
-from urllib.request import url2pathname
 
 from reflect.component import Commented
-from .data_reflection import reflect
+from .data_reflection import reflect, reflect_union
 from .utils import to_posix, to_valid_identifier
 import typing
 import os
@@ -17,16 +16,32 @@ except ImportError:
     from functools import lru_cache
     cache = lru_cache(maxsize=None)
 
+if typing.TYPE_CHECKING:
+    ClassifiedUrl = typing.Union[
+        'LocalProjUrl', 'CloudProjUrl', 'LocalMetaUrl', 'CloudMetaUrl', 'CloudGitRepoUrl',
+    ]
+    ClassifiedUrl_RT = object
+else:
+    @reflect_union
+    class ClassifiedUrl:
+        pass
+    ClassifiedUrl_RT = ClassifiedUrl
+    
+
 @reflect
 @dataclass(frozen=True)
-class LocalProjUrl:
+class LocalProjUrl(ClassifiedUrl_RT):
     """it may be a git repo, but not a must
     """
     project_comf_path: str
 
     @cache
     def local_git_directory(self) -> str:
-        secs = to_posix(self.project_comf_path).split('/')
+        path = self.project_comf_path[:-len("/project.comf")]
+        if path == "":
+            secs = ["local"]
+        else:
+            secs = to_posix("local_" + self.project_comf_path[:-len("/project.comf")]).split('/')
         return '/'.join(map(to_valid_identifier, secs)).replace('//', '/mod/')
 
     def get_project_dir(self):
@@ -48,12 +63,12 @@ class LocalProjUrl:
 
 @reflect
 @dataclass(frozen=True)
-class CloudProjUrl:
+class CloudProjUrl(ClassifiedUrl_RT):
     project_comf_url: str
     
     @cache
     def local_git_directory(self) -> str:
-        result = urlparse(self.project_comf_url)
+        result = urlparse(self.project_comf_url[:-len("/project.comf")])
         hostname = result.hostname or 'NO_HOST'
         path = result.path
         secs = to_posix(os.path.join("unknown_cloud", hostname, path)).split('/')
@@ -78,7 +93,7 @@ class CloudProjUrl:
 
 @reflect
 @dataclass(frozen=True)
-class LocalMetaUrl:
+class LocalMetaUrl(ClassifiedUrl_RT):
     meta_comf_path: str
     
     def local_git_directory(self) -> str:
@@ -99,7 +114,7 @@ class LocalMetaUrl:
 
 @reflect
 @dataclass(frozen=True)
-class CloudMetaUrl:
+class CloudMetaUrl(ClassifiedUrl_RT):
     link: str
 
     def local_git_directory(self) -> str:
@@ -120,7 +135,7 @@ class CloudMetaUrl:
 
 @reflect
 @dataclass(frozen=True)
-class CloudGitRepoUrl:
+class CloudGitRepoUrl(ClassifiedUrl_RT):
     provider: str  # github, gitlab, bitbucket
     user_repo: str  # user/repo
     branch: str
@@ -152,13 +167,7 @@ class CloudGitRepoUrl:
         return Url(Commented([], link), Commented([], self.branch))
 
 
-if typing.TYPE_CHECKING:
-    ClassifiedUrl = typing.Union[
-        LocalProjUrl, CloudProjUrl, LocalMetaUrl, CloudMetaUrl, CloudGitRepoUrl,
-    ]
 
-else:
-    ClassifiedUrl = object
 
 RawUrlIfTheHostIsNotRaw = str
 HostName = str
@@ -179,7 +188,7 @@ def classify_url(x: str, branch: str | None):
             if len(secs) == 2:
                 # is repo
                 branch = branch or "main"
-                return CloudGitRepoUrl(provider, os.path.join(*secs), branch).cast()
+                return CloudGitRepoUrl(provider, to_posix(os.path.join(*secs)), branch).cast()
 
             if provider == "github":  # rawgithub use different hostname:
                 raise FileNotFoundError(
@@ -201,8 +210,8 @@ def classify_url(x: str, branch: str | None):
     if x.startswith("file:///"):
         x = x[len("file:///") :]
 
-    path_x = Path(x)
-
+    path_x = Path(Path(x).as_posix())
+    
     if path_x.is_file() and path_x.name == "project.comf":
         return LocalProjUrl(x).cast()
 

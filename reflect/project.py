@@ -44,6 +44,7 @@ class Project:
     locals: list[Commented[Local]]
     src: Commented[list[Commented[str]]]
     deps: list[Commented[Dep]]
+    exe: Commented[str] | None
 
 
 @reflect
@@ -90,9 +91,10 @@ class Dist:
 
 PackageId = str
 
-def create_metadata_from_project(proj: Project):
+def create_metadata_from_project(url_o: ClassifiedUrl, proj: Project):
 
     locals: dict[PackageId, ClassifiedUrl] = {}
+    locals[proj.name.uncomment] = url_o
 
     for each in proj.locals:
         url = each.uncomment.url.uncomment

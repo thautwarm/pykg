@@ -3,8 +3,9 @@ import typing
 from reflect.component import SpecifierSet, operator, specifier
 
 from reflect.data_reflection import from_comf, reflect
-from reflect.project import Metadata, Project, Commented, Dep, Local
+from reflect.project import Metadata, Project, Commented, Dep, Local, Author
 from .version import Version as version
+from .utils import to_netversion
 from .async_request import areadpage, get_async_result
 from reflect.fetch_dependencies import Requirements
 from typing_extensions import Protocol
@@ -22,6 +23,7 @@ import tomli_w
 
 PackageId = str
 
+PYKG_MODULES = Path("pykg_modules")
 
 @reflect
 @dataclass
@@ -35,11 +37,17 @@ class FableRepo:
 @dataclass
 class LockProject:
     pkgname: str
+    pkgver: Version
+    authors: list[Author]
     python_version: Version | None
+    net_version: Version | None
     local_urls: list[tuple[PackageId, ClassifiedUrl]]
     pypi_deps: list[tuple[str, Version]]
+    nuget_deps: list[tuple[str, Version]]
     fable_repos: list[FableRepo]
-
+    python_package: str
+    fs_python_package: str
+    fsexe: str | None
 
 class BuildError(Exception):
     pass
@@ -52,15 +60,16 @@ class FsPyBuilder:
     def get_fspy_repo(self, meta: Metadata):
         pkg_name = meta.name.uncomment
         classified_url = self.requirements.locals.get(pkg_name)
-        dist = self.requirements.get_dist(meta)
-        if not dist.url:
-            raise BuildError(
-                f"invalid 'fspy' project {pkg_name} from {classified_url}; fspy project should always have a url in a distribution (not in project.comf, but in the generated metadata.comf)."
+        if not classified_url:
+            dist = self.requirements.get_dist(meta)
+            if not dist.url:
+                raise BuildError(
+                    f"invalid 'fspy' project {pkg_name} from {classified_url}; fspy project should always have a url in a distribution (not in project.comf, but in the generated metadata.comf)."
+                )
+            url = dist.url.uncomment
+            classified_url = classify_url(
+                url.link.uncomment, url.git_branch and url.git_branch.uncomment
             )
-        url = dist.url.uncomment
-        classified_url = classify_url(
-            url.link.uncomment, url.git_branch and url.git_branch.uncomment
-        )
         return git.get_git_repo(classified_url)
 
     def lock(self):
@@ -86,8 +95,27 @@ class FsPyBuilder:
                     [], Local(Commented([], pkgid), Commented([], local.to_valid_url()))
                 )
             )
+    
+        _, pypkgname = self_name.split("/")
+        python_package = to_valid_identifier(pypkgname)
+        fable_python_package = python_package + "_FABLE"
 
-        lock_proj = LockProject(self_name, None, [], [], [])
+        lock_proj = LockProject(
+            pkgname=self_name,
+            pkgver=self_proj.version.uncomment,
+            authors=[author.uncomment for author in self_proj.authors],
+            python_version=None,
+            net_version=None,
+            nuget_deps=[],
+            local_urls=[],
+            pypi_deps=[],
+            fable_repos=[],
+            fsexe = self_proj.exe and self_proj.exe.uncomment,
+            python_package=python_package,
+            fs_python_package=fable_python_package
+            
+        )
+
         lock_proj.local_urls.extend(requirements.locals.items())
 
         for pkgid, (metadata, ver) in requirements.dependencies.items():
@@ -96,9 +124,6 @@ class FsPyBuilder:
                 lock_proj.pypi_deps.append((name, ver))
 
             elif kind == "fspy":
-                if pkgid == self_name:
-                    continue
-
                 repo = self.get_fspy_repo(metadata)
                 _, comf = repo.sync_readfile("project.comf")
                 proj = from_comf(Project, comf.decode("utf-8"))
@@ -106,23 +131,26 @@ class FsPyBuilder:
                 for fsharp_src in proj.src.uncomment:
                     sources.append(fsharp_src.uncomment)
                 lock_proj.fable_repos.append(FableRepo(pkgid, repo.url, sources))
-
+            elif kind == "nuget":
+                lock_proj.nuget_deps.append((name, ver))
+                pass
             elif kind == "lang" and name == "python":
                 lock_proj.python_version = ver
+            elif kind == "lang" and name == "net":
+                lock_proj.net_version = ver
         
 
         return lock_proj
 
 
-
-
-def build_from_lock(self, lock_proj: LockProject, update: bool = False, **opts):
-    pykg_modules = Path("_pykg_modules")
-
+def build_from_lock(lock_proj: LockProject, update: bool = False, **opts):
+    pykg_modules = PYKG_MODULES
     pyproject_deps: list[tuple[str, dict]] = []
 
     python_requires = lock_proj.python_version
     python_requires = python_requires and python_requires.to_string_without_prefix()
+    net_version = lock_proj.net_version
+    net_version = net_version and to_netversion(net_version)
     fsharp_sources: list[str] = []
 
     for name, ver in lock_proj.pypi_deps:
@@ -139,19 +167,20 @@ def build_from_lock(self, lock_proj: LockProject, update: bool = False, **opts):
             fsharp_sources.append(str(pykg_modules / local_git_dir / source))
             repo.require_file(source)
 
-    _, pkgname = lock_proj.pkgname.split("/")
-    python_package = to_valid_identifier(pkgname)
-    fable_python_package = python_package + "_FABLE"
-
+    
+    pkgname = lock_proj.pkgname.split('/')[1]
     poetry_toml = tomli_w.dumps(
         {
             "tool": {
                 "poetry": {
-                    "dependencies": {dict([k]) for k in pyproject_deps},
+                    "authors": [f"{author.name.uncomment} {author.email or ''}" for author in lock_proj.authors],
+                    "description": "",
+                    "version": lock_proj.pkgver.to_string_without_prefix(),
+                    "dependencies": {k: v for k, v in pyproject_deps},
                     "name": pkgname,
                     "packages": [
-                        {"include": fable_python_package},
-                        {"include": python_package},
+                        {"include": lock_proj.python_package},
+                        {"include": lock_proj.fs_python_package},
                     ],
                 },
             }
@@ -167,7 +196,7 @@ def build_from_lock(self, lock_proj: LockProject, update: bool = False, **opts):
                     content=[
                         xml(
                             name="TargetFramework",
-                            content=opts.get("net_framework", "net6.0"),
+                            content=opts.get("net_framework", net_version),
                         ),
                         xml(name="NoWarn", content="3370"),
                     ],
@@ -187,7 +216,16 @@ def build_from_lock(self, lock_proj: LockProject, update: bool = False, **opts):
                             Include="Fable.Core.Experimental",
                             version=opts.get("fable_core_version", "4.0.0-alpha-027"),
                             content=None,
-                        )
+                        ),
+                        *[
+                            xml(
+                                name="PackageReference",
+                                Include=name,
+                                version = to_netversion(ver),
+                                content=None
+                            )
+                            for name, ver in lock_proj.nuget_deps
+                        ]
                     ],
                 ),
             ],

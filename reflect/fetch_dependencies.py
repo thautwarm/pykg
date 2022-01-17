@@ -23,6 +23,7 @@ from .version import mk_version
 from .classified_url import (ClassifiedUrl, CloudGitRepoUrl, CloudMetaUrl, CloudProjUrl, LocalMetaUrl, LocalProjUrl, classify_url)
 from . import log
 from . import git
+from . import pretty_doc as doc
 from .errors import InvalidComfigVersion
 from .version import Version as version
 from .z3_dep_solver import lt_tuple, le_tuple, gt_tuple, ge_tuple, eq_tuple, ne_tuple
@@ -80,14 +81,13 @@ def request_pykg(mirror: str, package_name: str, locals: dict[PackageId, Classif
 
         if is_project:
             proj = from_comf(Project, src.decode('utf-8'))
-            new_locals, meta = create_metadata_from_project(proj)
+            new_locals, meta = create_metadata_from_project(url_o, proj)
             if new_locals:
                 locals.update(new_locals)
         else:
             meta = from_comf(Metadata, src.decode('utf-8'))
         
         return meta
-        
     kind, unkinded_name = package_name.split("/", 1)
     C = unkinded_name[0].upper()
     url = rf"{mirror}/{kind}/{C}/{unkinded_name}.comf"
@@ -175,6 +175,63 @@ def version_to_z3_tuple(x: version) -> Z3Tuple:
     return TupleCons(x.major, x.minor, x.micro)
 
 
+def pretty_error(
+    solver: z3.Solver,
+    deps: _DepGraph,
+    name_to_z3_tuple: dict[PackageId, Z3Tuple],
+    meta: Metadata):
+    return get_unsat_reason(solver, deps, name_to_z3_tuple, meta)
+
+def get_unsat_reason(
+    solver: z3.Solver,
+    deps: _DepGraph,
+    name_to_z3_tuple: dict[PackageId, Z3Tuple],
+    meta: Metadata):
+    
+    n = len(meta.distributions) # n > 1
+    n = min(10, n)
+    unsat_cores = [ _get_unsat_reason(solver, deps, name_to_z3_tuple, meta, i) for i in range(n) ]
+    return unsat_cores
+
+def _get_unsat_reason(
+    solver: z3.Solver,
+    deps: _DepGraph,
+    name_to_z3_tuple: dict[PackageId, Z3Tuple],
+    meta: Metadata,
+    i: int,
+    ):
+    solver.push()
+    pid = meta.name.uncomment
+    dist_ = meta.distributions[i]
+    dist = dist_.uncomment
+    z3_var_dep_ver = name_to_z3_tuple[pid]
+    deps1 = deps[pid]
+    deps2 = deps1[dist.version.uncomment]
+
+    solver.assert_and_track(
+        z3_var_dep_ver == version_to_z3_tuple(dist.version.uncomment),
+        f"indirect dependency {pid} == {dist.version.uncomment}")
+    for each_spec in dist.deps:
+        dep_pid = each_spec.uncomment.name.uncomment
+        if dep_pid in deps2:
+            continue
+        dep_var_ver = name_to_z3_tuple[dep_pid]
+        for specifier in each_spec.uncomment.version.uncomment.specifiers:
+            spec_ver = specifier.version
+            z3_spec_ver = TupleCons(spec_ver.major, spec_ver.minor, spec_ver.micro)
+            cmp_func = _op_maps[specifier.op]
+            solver.assert_and_track(
+                cmp_func(dep_var_ver, z3_spec_ver),
+                f"{dep_pid} {specifier.op} {spec_ver}")
+        
+    
+    solver.check()
+    core = list(map(repr, solver.unsat_core())) # type: ignore
+    solver.pop()
+    return dist.version.uncomment, core
+
+    
+
 def update_deps_for_project(
     solver: z3.Solver,
     deps: _DepGraph,
@@ -219,12 +276,24 @@ else:
 
 class DependencyUnsatisfied(Exception):
     direct_dep: str
-    unsatisified_reasons: list[str]
+    unsatisified_reasons: list[tuple[version, list[str]]]
 
-    def __init__(self, direct_dep: str, reasons: list[str]):
-        super().__init__()
+    def __init__(self, direct_dep: str, indir: str, reasons: list[tuple[version, list[str]]]):
         self.direct_dep = direct_dep
         self.unsatisified_reasons = reasons
+        msg = doc.vsep([
+            doc.seg(f"directory dependency {direct_dep!r} is not satisfiable due to {indir!r}:"),
+            doc.indent(2, doc.vsep([
+                doc.vsep(
+                    [
+                        (doc.seg('==') + doc.seg(str(ver)) + doc.seg("invalid")),
+                        doc.indent(4, doc.vsep(list(map(doc.seg, reason))))
+                    ]
+                )
+                for ver, reason in reasons
+            ]))
+        ]).show()
+        super().__init__(msg)
 
 
 class PackageNameToZ3TupleVar(typing.Dict[PackageId, Z3Tuple]):
@@ -256,22 +325,23 @@ def get_deps_from_metadata(
     name_to_z3_tuple: PackageNameToZ3TupleVar = PackageNameToZ3TupleVar()
     dep_graph: _DepGraph = typing.cast(_DepGraph, DefaultDict(lambda: DefaultDict(set)))
     solver = z3.Solver()
+    solver.push()
     requirements = list(
         update_deps_for_project(solver, dep_graph, name_to_z3_tuple, meta)
     )
     name_to_metadata: dict[PackageId, Metadata] = {meta.name.uncomment: meta}
-
+    
     if solver.check() != z3.sat:
-        raise DependencyUnsatisfied(meta.name.uncomment, [repr(meta.name.uncomment)])
+        solver.pop()
+        raise DependencyUnsatisfied(meta.name.uncomment, meta.name.uncomment, pretty_error(solver, dep_graph, name_to_z3_tuple, meta))
 
     requirements_consumed = deque(requirements)
-    reached: set[str] = set()
+    reached: set[str] = {meta.name.uncomment}
 
     while requirements_consumed:
         requirement = requirements_consumed.popleft()
         to_resolve: list[str] = [requirement]
         while to_resolve:
-
             def comprehension():
                 for pid in to_resolve:
                     if pid in reached:
@@ -287,14 +357,17 @@ def get_deps_from_metadata(
                 if meta_ is None:
                     continue
                 name_to_metadata[meta_.name.uncomment] = meta_
+                solver.push()
+                assert solver.check() == z3.sat
                 to_resolve.extend(
                     update_deps_for_project(solver, dep_graph, name_to_z3_tuple, meta_)
                 )
-        if solver.check() != z3.sat:
-            raise DependencyUnsatisfied(requirement, [repr(meta.name.uncomment)])
+                if solver.check() != z3.sat:
+                    solver.pop()
+                    raise DependencyUnsatisfied(requirement, meta_.name.uncomment, pretty_error(solver, dep_graph, name_to_z3_tuple, meta_))
+        
 
     model = solver.model()
-    print(model)
 
     # this procedure is to built correct order of fixed packages
     def get_version_of_package(pid):
@@ -313,6 +386,12 @@ def get_deps_from_metadata(
         yield pid
 
     ordered_packages = list(visit(meta.name.uncomment))
+
+    log.info(
+        "dependencies resolved:\n" +
+        '\n'.join(
+            '- ' + name + " " + str(z3_tuple_to_version(model[name_to_z3_tuple[name]])) # type: ignore
+        for name in ordered_packages))
     deps = OrderedDict()
     for pid in ordered_packages:
         deps[pid] = (name_to_metadata[pid], get_version_of_package(pid))
@@ -325,7 +404,7 @@ def get_deps_from_local_project(
     url_o = LocalProjUrl(project_path).cast()
     locals[proj.name.uncomment] = url_o
     # url_o = Url.raw_url(create_file_url(project_path))
-    new_locals, meta = create_metadata_from_project(proj)
+    new_locals, meta = create_metadata_from_project(url_o, proj)
     if new_locals:
         locals.update(new_locals)
     locals[meta.name.uncomment] = url_o

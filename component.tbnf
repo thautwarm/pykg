@@ -22,7 +22,7 @@ extern var PATCH : operator
 extern var COMPACT : operator
 
 extern type Component
-extern var CNull : Component
+extern var CNull : () -> Component
 extern var CNum : num -> Component
 extern var CStr : str -> Component
 extern var CBool : bool -> Component
@@ -80,7 +80,7 @@ comp      : <EXP>      { CNum(toNum(lexeme($1))) }
           | <STR>      { CStr(unesc(lexeme($1))) }
           | "true"     { CBool(true) }
           | "false"    { CBool(false) }
-          | "null"     { CNull }
+          | "null"     { CNull() }
           | version    { CVer($1) }
           | specifier_set { CSpec(mk_specifier_set($1)) }
           | id comp    { CCons(lexeme($1), $2) }

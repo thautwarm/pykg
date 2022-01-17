@@ -22,7 +22,6 @@ def request_pypi_package_versions(package_name: str):
     resp, v = yield from areadpage(rf"https://pypi.org/simple/{package_name}/")
     if resp.status != 200:
         return []
-    # print(v.decode())
     results = []
     found = set()
     for each in BeautifulSoup(v, features="html.parser").findAll(name="a"):

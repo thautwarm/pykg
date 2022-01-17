@@ -55,7 +55,8 @@ metadata
 
 req = get_deps_from_metadata(DEFAULT_MIRROR, meta, {})
 lock_project = FsPyBuilder(req).lock()
-print(to_comf(lock_project))
+ss = to_comf(lock_project)
+
 
 # @reflect
 # @reflect_opt('name', recogniser=lambda x: isinstance(x, CStr))

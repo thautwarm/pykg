@@ -29,6 +29,7 @@ REFL_OPTS_FIELD = "__pykg_reflection_opts__"
 REFL_IF_TYPENAME_ERASED_FIELD = "__pykg_reflection_typename_erased__"
 REFL_FIELDINFO_FIELD = "__pykg_reflection__"
 
+REFL_UNION_CASE_FIELD = "__pykg_union_cases__"
 
 @dataclass
 class ReflOpt:
@@ -215,6 +216,32 @@ else:
         REFL_REGISTRATION[cls] = dataclass_type(cls, *refl, name_erased=name_erased)
         return cls
 
+def reflect_union(t):
+    @classmethod
+    def __init_subclass__(cls, *args, **kwargs):
+        if hasattr(t, REFL_UNION_CASE_FIELD):
+            cases_field = typing.cast('list | tuple', getattr(t, REFL_UNION_CASE_FIELD))
+        else:
+            cases_field = []
+            setattr(t, REFL_UNION_CASE_FIELD, cases_field)
+        if isinstance(cases_field, tuple):
+            raise TypeError("cannot add new cases to sealed types!")
+        cases_field.append(lambda: type_reflection(cls))
+    
+    def get_cases():
+        if not hasattr(t, REFL_UNION_CASE_FIELD):
+            return ()
+        else:
+            fields = getattr(t, REFL_UNION_CASE_FIELD)
+            if isinstance(fields, list):
+                fields = tuple(f() for f in fields)
+                setattr(t, REFL_UNION_CASE_FIELD, fields)
+            return fields
+
+    t.__init_subclass__ = __init_subclass__
+    REFL_REGISTRATION[t] = union_type(t, get_cases)
+    return t
+
 
 def type_reflection(t: type) -> TypeInfo:
     if tinfo := REFL_REGISTRATION.get(t):
@@ -257,6 +284,7 @@ def to_comf(x, line_width: int | None = None):
     else:
         opts = RenderOptions(line_width)
     return to_doc(type_reflection(type(x)).deconstruct(x)).show(opts)
+    
 
 
 _T = typing.TypeVar("_T")
@@ -270,10 +298,11 @@ __all__ = [
     "reflect",
     "reflect_opt",
     "type_reflection",
+    "reflect_union"
     "get_reflection_opts",
     "erase_typename",
     "from_comf",
-    "to_comf"
+    "to_comf",
 ]
 
 

@@ -336,7 +336,7 @@ SpecifierSetType = TypeInfo(SpecifierSet, None, spec_construct, spec_deconstruct
 def ver_construct(x: Component) -> Version:
     if isinstance(x, CVer):
         return x.ver
-    raise FromComponentError
+    raise FromComponentError(f"requires a version, got {x}")
 
 
 def ver_deconstruct(x):
@@ -424,7 +424,7 @@ def dataclass_type(
             else:
                 elements = typing.cast("list[Component]", [x.param])
         else:
-            raise FromComponentError
+            raise FromComponentError(f"parse {cls.__name__} from {x}")
         arguments = []
         used = [False] * len(elements)
         for field_maker in field_makers:
@@ -451,18 +451,20 @@ def dataclass_type(
 
 
 @_cache
-def union_type(sealed_cls: type, *cases: TypeInfo):
+def union_type(sealed_cls: type, get_cases: typing.Callable[[], tuple[TypeInfo, ...]]):
     def data_construct(x: Component):
+        cases = get_cases()
         if not isinstance(x, CCons):
             raise FromComponentError
         for case in cases:
-            casename = case.cls.__name__
-            if normalize_name(casename) != normalize_name(x.name):
+            casename = normalize_name(case.cls.__name__)
+            if casename != normalize_name(x.name):
                 continue
             return case.construct(x.param)
         raise FromComponentError
 
     def data_deconstruct(union):
+        cases = get_cases()
         for case in cases:
             if isinstance(union, case.cls):
                 casename = normalize_name(case.cls.__name__)

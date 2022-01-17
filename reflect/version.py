@@ -8,10 +8,10 @@ class Version:
     micro: int
 
     def __str__(self):
-        return f"v{self.major}.{self.minor}.{self.minor}"
+        return f"v{self.major}.{self.minor}.{self.micro}"
     
     def to_string_without_prefix(self):
-        return f"{self.major}.{self.minor}.{self.minor}"
+        return f"{self.major}.{self.minor}.{self.micro}"
 
 
 def mk_version(a: int, b: int, c: int) -> Version:
@@ -30,7 +30,9 @@ version_regex_incomplete = re.compile(
 
 
 def get_typed_version(extract_version: str):
-    match_group = version_regex.match(extract_version).groupdict("0")
+    match_group = version_regex.match(extract_version)
+    assert match_group
+    match_group = match_group.groupdict("0")
     major = int(match_group["major"])
     minor = int(match_group["minor"])
     micro = int(match_group["micro"])

@@ -2,6 +2,8 @@ from __future__ import annotations
 from io import StringIO
 from pathlib import Path
 from string import ascii_letters
+
+from reflect.version import Version
 _ascii_letters = frozenset(ascii_letters)
 
 def to_posix(x: str | Path):
@@ -9,6 +11,9 @@ def to_posix(x: str | Path):
         return x.as_posix()
 
     return Path(x).as_posix()
+
+def to_netversion(x: Version):
+    return f"net{x.major}.{x.minor}.{x.micro}"
      
 def to_valid_identifier(x: str):
     buf = StringIO()

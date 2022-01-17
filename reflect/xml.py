@@ -30,10 +30,10 @@ def to_doc(self: XML) -> doc.Doc:
         if isinstance(self.contents, list):
             return doc.vsep([
                 doc.angle(doc.seg(self.name) * attrs),
-                *map(to_doc, self.contents),
+                doc.indent(4, doc.vsep(list(map(to_doc, self.contents)))),
                 doc.angle(slash * doc.seg(self.name))
             ])
-        return doc.angle(doc.seg(self.name) * attrs) * doc.seg(escape(self.contents)) * doc.angle(slash * doc.seg(self.name))
+        return doc.angle(doc.seg(self.name) * attrs) * doc.indent(4, doc.seg(escape(self.contents))) * doc.angle(slash * doc.seg(self.name))
     assert not self.contents
     return doc.angle(doc.seg(self.name) * attrs * slash)
 

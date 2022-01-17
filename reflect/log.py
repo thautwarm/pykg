@@ -5,3 +5,6 @@ def warn(s: str):
 
 def error(s: str):
     logger.error(s)
+
+def info(s: str):
+    logger.info(s)

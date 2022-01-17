@@ -51,7 +51,7 @@ class RBNFTransformer(Transformer):
         return CVer(__tbnf_COMPONENTS[0])
     
     def comp_4(self, __tbnf_COMPONENTS):
-        return CNull
+        return CNull()
     
     def comp_3(self, __tbnf_COMPONENTS):
         return CBool(False)

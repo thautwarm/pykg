@@ -4,3 +4,5 @@ loguru
 gitpython
 diskcache
 tomli-w
+wisepy2>=1.2
+z3-solver
