@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Type
 from collections import deque
 from http.client import HTTPResponse
+from urllib.parse import urlparse
 import socket
 import types
 import io
@@ -82,7 +83,7 @@ def aread_sock(ssl_sock, size, timeout: float = 60):
         try:
             data = ssl_sock.recv(size)
             return data
-        except ssl.SSLError:
+        except ssl.SSLError as e:
             yield Pending
         except BlockingIOError:
             yield Pending
@@ -92,32 +93,47 @@ def aread_sock(ssl_sock, size, timeout: float = 60):
             raise
 
 
-DUMMY_RESP_BYTES = b"HTTP/1.1 200 OK\r\n\r\n"
+DUMMY_RESP_BYTES_OK = b"HTTP/1.0 200 OK\r\n\r\n"
+DUMMY_RESP_BYTES_ERR = b"HTTP/1.0 404 Not Found\r\n\r\n"
 
 
-def areadpage(url, timeout=10):
-    protocol, _, host, path = url.split("/", 3)
-    host, path = map(str.encode, (host, path))
+def create_file_url(path: str):
+    return "file:///" + path
+
+
+def areadpage(url: str, timeout=10):
+    uri = urlparse(url)
+    host = uri.hostname
+    path = uri.path
+    path = path[1:] # # strip the first "/"
     context = ssl.create_default_context()
     context = ssl.SSLContext(ssl.PROTOCOL_TLS)
     context.verify_mode = ssl.CERT_NONE
     context.check_hostname = False
-    if protocol == "https:":
+    if uri.scheme == "https":
         port = 443
-    elif protocol == "http:":
+    elif uri.scheme == "http":
         port = 80
-    elif protocol == "file:":
-        resp = parse_http_response(DUMMY_RESP_BYTES)
-        return resp, open(path, "rb").read()
+    elif uri.scheme == "file":
+        try:
+            with open(path, "rb") as file:
+                src = file.read()
+        except IOError:
+            resp = parse_http_response(DUMMY_RESP_BYTES_ERR)
+            return resp, b''
+        resp = parse_http_response(DUMMY_RESP_BYTES_OK)
+        return resp, src
     else:
-        raise IOError(f"unknown protocol: {protocol}")
+        raise IOError(f"unknown protocol: {uri.scheme}")
+    assert host
+    host, path = map(str.encode, (host, path))
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock, context.wrap_socket(
-        sock, server_hostname=host.decode(encoding="utf-8")
+        sock, 
+        server_hostname=host.decode(encoding="utf-8")
     ) as ssl_sock:
         ssl_sock.connect((host, port))
         start_time = time.time()
         request = req_html(host, path)
-        # print(request.decode())
         ssl_sock.sendall(request)
         ssl_sock.setblocking(False)
         chunk = bytearray()
@@ -126,7 +142,6 @@ def areadpage(url, timeout=10):
             chunk.extend(c)
             if chunk.endswith(b"\r\n\r\n"):
                 break
-
         resp = parse_http_response(chunk)
         if resp.status != 200:
             return resp, b""
@@ -134,14 +149,14 @@ def areadpage(url, timeout=10):
         ios = io.BytesIO()
         while True:
             data = yield from aread_sock(
-                ssl_sock, 1024, timeout - (time.time() - start_time)
+                ssl_sock, 128, timeout - (time.time() - start_time)
             )
             if not data:
                 return resp, ios.getvalue()
             ios.write(data)
 
 
-def get_async_result(gen):
+def get_async_result(gen: typing.Generator[None, None, _T]) -> _T:
     try:
         while True:
             next(gen)
@@ -168,11 +183,11 @@ def gather(gens: list):
     return results
 
 
-def gather_with_limited_workers(gens: list, nworkers: int = 16):
-    results = []
+def gather_with_limited_workers(gens: typing.List[typing.Generator[None, None, _T]], nworkers: int = 16) -> typing.Generator[None, None, typing.List[_T]]:
+    results: typing.List[_T] = []
     alltasks = deque()
     for i in range(len(gens)):
-        results.append(None)
+        results.append(None) # type: ignore
         alltasks.append((i, gens[i]))
     tasks = deque()
     while nworkers and alltasks:

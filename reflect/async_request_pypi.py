@@ -8,8 +8,8 @@ from .async_request import (
     run_many,
     gather_with_limited_workers,
 )
-from _fable_pykg.src.comp import mk_specifier
-from _fable_pykg.src import comp
+from .component import specifier as mk_specifier
+from .component import operator as comp
 from types import GeneratorType
 from packaging.requirements import Requirement
 from . import log

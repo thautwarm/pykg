@@ -2,3 +2,5 @@ lark >= 0.11.3
 typing_extensions
 loguru
 gitpython
+diskcache
+tomli-w

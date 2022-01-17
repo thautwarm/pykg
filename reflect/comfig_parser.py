@@ -1,13 +1,13 @@
 from __future__ import annotations
-from .comfig_require import (one_or_list,mk_specifier,parse_version,CCommented,CList,CCons,CSpec,CVer,CBool,CStr,CNum,CNull,Component,COMPACT,PATCH,LE,GE,LT,GT,NE,EQ,operator,toArray,add,toNum,lexeme,unesc,specifier,version,array,num)
+from .comfig_require import (one_or_list,sink_comments,mk_specifier_set,mk_specifier,parse_version,CCommented,CList,CCons,CSpec,CVer,CBool,CStr,CNum,CNull,Component,COMPACT,PATCH,LE,GE,LT,GT,NE,EQ,operator,toArray,add,toNum,lexeme,unesc,SpecifierSet,specifier,version,array,num)
 from .comfig_lexer import lexall as lexall
 from .comfig_construct import *
 from lark.lexer import Lexer as Lexer
 from lark import Transformer as Transformer
 from lark import Lark as Lark
 from _tbnf.FableSedlex.sedlex import from_ustring as from_ustring
-tokenmaps = ["_I__H__J__I_", "_I__M__M__I_", "_I__I__I_", "_I__I__J__I_", "_I__J__J__I_", "_I__K__I_", "_I__K__J__I_", "_I__N__I_", "_I__P__I_", "_I__Q__I_", "_I_FALSE_I_", "_I_FORMAT_I_", "_I_NULL_I_", "_I_TRUE_I_", "_I__T__I_", "_I__V__I_", "_I__W__I_", "EXP", "ID", "LINE_COMMENT", "STR", "VERSION", "UNKNOWN"]
-tokenreprs = ["\"!=\"", "\"&&\"", "\"<\"", "\"<=\"", "\"==\"", "\">\"", "\">=\"", "\"[\"", "\"]\"", "\"^\"", "\"false\"", "\"format\"", "\"null\"", "\"true\"", "\"{\"", "\"}\"", "\"~\"", "EXP", "ID", "LINE_COMMENT", "STR", "VERSION", "UNKNOWN"]
+tokenmaps = ["_I__H__J__I_", "_I__M__M__I_", "_I__I__I_", "_I__I__J__I_", "_I__J__J__I_", "_I__K__I_", "_I__K__J__I_", "_I__Q__I_", "_I_FALSE_I_", "_I_FORMAT_I_", "_I_NULL_I_", "_I_TRUE_I_", "_I__T__I_", "_I__V__I_", "_I__W__I_", "EXP", "ID", "LINE_COMMENT", "STR", "VERSION", "UNKNOWN"]
+tokenreprs = ["\"!=\"", "\"&&\"", "\"<\"", "\"<=\"", "\"==\"", "\">\"", "\">=\"", "\"^\"", "\"false\"", "\"format\"", "\"null\"", "\"true\"", "\"{\"", "\"}\"", "\"~\"", "EXP", "ID", "LINE_COMMENT", "STR", "VERSION", "UNKNOWN"]
 
 def construct_token(token_id, lexeme, line, col, span, offset, file):
     if token_id == -1: return token("EOF", "")
@@ -35,23 +35,17 @@ class RBNFTransformer(Transformer):
     def list_o_comment_p__0(self, __tbnf_COMPONENTS):
         return [__tbnf_COMPONENTS[0]]
     
-    def comp_11(self, __tbnf_COMPONENTS):
+    def comp_9(self, __tbnf_COMPONENTS):
         return CList([])
     
-    def comp_10(self, __tbnf_COMPONENTS):
+    def comp_8(self, __tbnf_COMPONENTS):
         return CList(__tbnf_COMPONENTS[1])
     
-    def comp_9(self, __tbnf_COMPONENTS):
-        return CCons(lexeme(__tbnf_COMPONENTS[0]), [])
-    
-    def comp_8(self, __tbnf_COMPONENTS):
-        return CCons(lexeme(__tbnf_COMPONENTS[0]), __tbnf_COMPONENTS[2])
-    
     def comp_7(self, __tbnf_COMPONENTS):
-        return CCons(lexeme(__tbnf_COMPONENTS[0]), [__tbnf_COMPONENTS[1]])
+        return CCons(lexeme(__tbnf_COMPONENTS[0]), __tbnf_COMPONENTS[1])
     
     def comp_6(self, __tbnf_COMPONENTS):
-        return CSpec(__tbnf_COMPONENTS[0])
+        return CSpec(mk_specifier_set(__tbnf_COMPONENTS[0]))
     
     def comp_5(self, __tbnf_COMPONENTS):
         return CVer(__tbnf_COMPONENTS[0])

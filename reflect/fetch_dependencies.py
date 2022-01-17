@@ -1,22 +1,28 @@
 from __future__ import annotations
 from ast import And
+from operator import is_
+from threading import local
 from tkinter import Pack
 from .async_request import (
-    get_async_result,
     areadpage,
     run_many,
     gather_with_limited_workers,
+    create_file_url,
 )
-from _fable_pykg.src.proj import parse_metadata, metadata, serialize_dep
-from _fable_pykg.src.comp import (
-    FromCompinentError,
-    mk_version,
-    operator,
-    specifier,
-    uncomment,
+from .data_reflection import to_comf, from_comf
+from .component import Commented, operator
+from .git import get_git_repo
+from .project import (
+    Project,
+    Metadata,
+    Dep,
+    Url,
+    create_metadata_from_project,
 )
-from _fable_pykg.src import comp
+from .version import mk_version
+from .classified_url import (ClassifiedUrl, CloudGitRepoUrl, CloudMetaUrl, CloudProjUrl, LocalMetaUrl, LocalProjUrl, classify_url)
 from . import log
+from . import git
 from .errors import InvalidComfigVersion
 from .version import Version as version
 from .z3_dep_solver import lt_tuple, le_tuple, gt_tuple, ge_tuple, eq_tuple, ne_tuple
@@ -27,12 +33,14 @@ from .z3_dep_solver import (
 )
 from .z3_dep_solver import tuple_var as _tuple_var, TupleCons as _TupleCons
 from collections import OrderedDict, deque
+from pathlib import Path
+from dataclasses import dataclass
 import z3
 import re
 import typing
 import sys
 
-from _fable_pykg_infr import z3_dep_solver
+PackageId = str
 
 
 class DefaultDict(dict):
@@ -47,15 +55,48 @@ class DefaultDict(dict):
 DEFAULT_MIRROR = r"https://raw.githubusercontent.com/thautwarm/comf-index/main"
 
 
-def request_pykg(mirror: str, package_name: str):
-    kind, unkinded_name = package_name.split("/")
+def request_pykg(mirror: str, package_name: str, locals: dict[PackageId, ClassifiedUrl]):
+    is_project = False
+    if url_o := locals.get(package_name):
+        if isinstance(url_o, LocalProjUrl):
+            resp, src = yield from areadpage(create_file_url(url_o.project_comf_path))
+            is_project = True
+        elif isinstance(url_o, LocalMetaUrl):
+            resp, src = yield from areadpage(create_file_url(url_o.meta_comf_path))
+        elif isinstance(url_o, CloudMetaUrl):
+            resp, src = yield from areadpage(url_o.link)
+        elif isinstance(url_o, CloudProjUrl):
+            resp, src = yield from areadpage(url_o.project_comf_url)
+            is_project = True
+        elif isinstance(url_o, CloudProjUrl):
+            repo = git.get_git_repo(url_o)
+            resp, src = yield from repo.areadfile("project.comf")
+            is_project = True
+        else:
+            raise Exception(f"impossible: unknown url type: {url_o.__class__.__name__}")
+    
+        if resp.status != 200:
+            raise ConnectionError(f"solving {package_name}: {url_o} is invalid")
+
+        if is_project:
+            proj = from_comf(Project, src.decode('utf-8'))
+            new_locals, meta = create_metadata_from_project(proj)
+            if new_locals:
+                locals.update(new_locals)
+        else:
+            meta = from_comf(Metadata, src.decode('utf-8'))
+        
+        return meta
+        
+    kind, unkinded_name = package_name.split("/", 1)
     C = unkinded_name[0].upper()
     url = rf"{mirror}/{kind}/{C}/{unkinded_name}.comf"
     resp, comf = yield from areadpage(url)
     if resp.status != 200:
-        raise ConnectionError
+        raise ConnectionError(f"solving {package_name}: {url} is invalid")
+    src = comf.decode("utf-8")
     try:
-        return parse_metadata(comf.decode("utf-8"))
+        return from_comf(Metadata, src)
     except InvalidComfigVersion as e:
         log.warn(
             f"invalid .comf from {url}: {e}\ncontact mirror maintainer to update the configuration."
@@ -111,15 +152,15 @@ def compact_compare(x: Z3Tuple, y: Z3Tuple):
     return z3.And(ge_tuple(x, y), lt_tuple(x, upper_bound))
 
 
-_op_maps: typing.Dict[int, typing.Callable[[Z3Tuple, Z3Tuple], typing.Any]] = {
-    id(comp.EQ): eq_tuple,
-    id(comp.NE): ne_tuple,
-    id(comp.LT): lt_tuple,
-    id(comp.LE): le_tuple,
-    id(comp.GT): gt_tuple,
-    id(comp.GE): ge_tuple,
-    id(comp.COMPACT): compact_compare,
-    id(comp.PATCH): patch_compare,
+_op_maps: typing.Dict[operator, typing.Callable[[Z3Tuple, Z3Tuple], typing.Any]] = {
+    operator.EQ: eq_tuple,
+    operator.NE: ne_tuple,
+    operator.LT: lt_tuple,
+    operator.LE: le_tuple,
+    operator.GT: gt_tuple,
+    operator.GE: ge_tuple,
+    operator.COMPACT: compact_compare,
+    operator.PATCH: patch_compare,
 }
 
 
@@ -134,37 +175,35 @@ def version_to_z3_tuple(x: version) -> Z3Tuple:
     return TupleCons(x.major, x.minor, x.micro)
 
 
-PackageId = str
-
-
 def update_deps_for_project(
     solver: z3.Solver,
     deps: _DepGraph,
     name_to_z3_tuple: dict[PackageId, Z3Tuple],
-    # deps: dict[PackageId, dict[version, dict[PackageId, set[specifier]]]],
-    meta: metadata,
+    meta: Metadata,
 ):
-    pid = uncomment(meta.name)
+    pid = meta.name.uncomment
     deps1 = deps[pid]
-    assert meta.distributions.elements is not None
     or_conditions = []
-    for dist_ in meta.distributions.elements:
-        dist = uncomment(dist_)
-        deps2 = deps1[uncomment(dist.version)]
+    for dist_ in meta.distributions:
+        dist = dist_.uncomment
+        deps2 = deps1[dist.version.uncomment]
         z3_var_dep_ver = name_to_z3_tuple[pid]
         dependency_constraints = [
-            z3_var_dep_ver == version_to_z3_tuple(uncomment(dist.version))
+            z3_var_dep_ver == version_to_z3_tuple(dist.version.uncomment)
         ]
-        assert dist.deps.elements is not None
-        for each_spec_ in dist.deps.elements:
-            each_spec = uncomment(each_spec_)
-            dep_pid = each_spec.name
+        for each_spec in dist.deps:
+            dep_pid = each_spec.uncomment.name.uncomment
+            if dep_pid in deps2:
+                log.warn(
+                    f"{pid!r} depends on {dep_pid!r} more than once:\n{to_comf(each_spec)}..."
+                )
+                continue
             deps2.add(dep_pid)
             dep_var_ver = name_to_z3_tuple[dep_pid]
-            for specifier in uncomment(each_spec.version):
+            for specifier in each_spec.uncomment.version.uncomment.specifiers:
                 spec_ver = specifier.version
                 z3_spec_ver = TupleCons(spec_ver.major, spec_ver.minor, spec_ver.micro)
-                cmp_func = _op_maps[id(specifier.op)]
+                cmp_func = _op_maps[specifier.op]
                 dependency_constraints.append(cmp_func(dep_var_ver, z3_spec_ver))
             yield dep_pid
         or_conditions.append(z3.And(*dependency_constraints))
@@ -179,10 +218,12 @@ else:
 
 
 class DependencyUnsatisfied(Exception):
+    direct_dep: str
     unsatisified_reasons: list[str]
 
-    def __init__(self, reasons: list[str]):
+    def __init__(self, direct_dep: str, reasons: list[str]):
         super().__init__()
+        self.direct_dep = direct_dep
         self.unsatisified_reasons = reasons
 
 
@@ -192,22 +233,43 @@ class PackageNameToZ3TupleVar(typing.Dict[PackageId, Z3Tuple]):
         return v
 
 
-def get_deps(mirror: str, meta: metadata) -> list[tuple[PackageId, version]]:
+@dataclass
+class Requirements:
+    self_meta: Metadata
+    self_proj: typing.Optional[Project]
+    locals: dict[PackageId, ClassifiedUrl]
+    dependencies: dict[PackageId, tuple[Metadata, version]]  # ordered
+
+    def get_dist(self, meta: Metadata):
+        name = meta.name.uncomment
+        _, v = self.dependencies[name]
+        dist = find_dist_by_version(meta, v)
+        if not dist:
+            # TODO: what is an appropriate error here?
+            raise Exception(f"dist not found for pykg '{name}' == {v}")
+        return dist.uncomment
+
+
+def get_deps_from_metadata(
+    mirror: str, meta: Metadata, locals: dict[PackageId, ClassifiedUrl]
+) -> Requirements:
     name_to_z3_tuple: PackageNameToZ3TupleVar = PackageNameToZ3TupleVar()
     dep_graph: _DepGraph = typing.cast(_DepGraph, DefaultDict(lambda: DefaultDict(set)))
     solver = z3.Solver()
     requirements = list(
         update_deps_for_project(solver, dep_graph, name_to_z3_tuple, meta)
     )
+    name_to_metadata: dict[PackageId, Metadata] = {meta.name.uncomment: meta}
+
     if solver.check() != z3.sat:
-        raise DependencyUnsatisfied([uncomment(meta.name)])
+        raise DependencyUnsatisfied(meta.name.uncomment, [repr(meta.name.uncomment)])
 
     requirements_consumed = deque(requirements)
     reached: set[str] = set()
 
     while requirements_consumed:
         requirement = requirements_consumed.popleft()
-        to_resolve = [requirement]
+        to_resolve: list[str] = [requirement]
         while to_resolve:
 
             def comprehension():
@@ -215,7 +277,7 @@ def get_deps(mirror: str, meta: metadata) -> list[tuple[PackageId, version]]:
                     if pid in reached:
                         continue
                     reached.add(pid)
-                    yield request_pykg(mirror, pid)
+                    yield request_pykg(mirror, pid, locals)
 
             tasks = list(comprehension())
             to_resolve.clear()
@@ -224,11 +286,12 @@ def get_deps(mirror: str, meta: metadata) -> list[tuple[PackageId, version]]:
             for meta_ in metas:
                 if meta_ is None:
                     continue
+                name_to_metadata[meta_.name.uncomment] = meta_
                 to_resolve.extend(
                     update_deps_for_project(solver, dep_graph, name_to_z3_tuple, meta_)
                 )
         if solver.check() != z3.sat:
-            raise DependencyUnsatisfied([uncomment(meta.name)])
+            raise DependencyUnsatisfied(requirement, [repr(meta.name.uncomment)])
 
     model = solver.model()
     print(model)
@@ -249,6 +312,31 @@ def get_deps(mirror: str, meta: metadata) -> list[tuple[PackageId, version]]:
             yield from visit(dist)
         yield pid
 
-    ordered_packages = list(visit(uncomment(meta.name)))
+    ordered_packages = list(visit(meta.name.uncomment))
+    deps = OrderedDict()
+    for pid in ordered_packages:
+        deps[pid] = (name_to_metadata[pid], get_version_of_package(pid))
+    return Requirements(meta, None, locals, deps)
 
-    return [(pid, get_version_of_package(pid)) for pid in ordered_packages]
+
+def get_deps_from_local_project(
+    mirror: str, project_path: str, proj: Project, locals: dict[PackageId, ClassifiedUrl]
+):
+    url_o = LocalProjUrl(project_path).cast()
+    locals[proj.name.uncomment] = url_o
+    # url_o = Url.raw_url(create_file_url(project_path))
+    new_locals, meta = create_metadata_from_project(proj)
+    if new_locals:
+        locals.update(new_locals)
+    locals[meta.name.uncomment] = url_o
+    req = get_deps_from_metadata(mirror, meta, locals)
+    req.self_proj = proj
+    return req
+
+
+def find_dist_by_version(meta: Metadata, ver: version):
+    for dist in meta.distributions:
+        dist_ver = dist.uncomment.version.uncomment
+        if dist_ver == ver:
+            return dist
+    return None

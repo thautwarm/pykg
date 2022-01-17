@@ -1,7 +1,6 @@
 import re
 from dataclasses import dataclass
 
-
 @dataclass(frozen=True, order=True)
 class Version:
     major: int
@@ -10,6 +9,9 @@ class Version:
 
     def __str__(self):
         return f"v{self.major}.{self.minor}.{self.minor}"
+    
+    def to_string_without_prefix(self):
+        return f"{self.major}.{self.minor}.{self.minor}"
 
 
 def mk_version(a: int, b: int, c: int) -> Version:

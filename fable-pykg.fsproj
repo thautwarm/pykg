@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="src/Data.fs" />
     <Compile Include="src/AJson.fs" />
     <Compile Include="src/PrettyDoc.fs" />
     <Compile Include="src/Comp.fs" />

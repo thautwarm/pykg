@@ -1,4 +1,4 @@
-tbnf --backend python-lark .\component.tbnf .\_fable_pykg_infr\ comfig
+tbnf --backend python-lark .\component.tbnf .\reflect\ comfig
 
-$PROJ="_fable_pykg"
-fable --outDir "${PROJ}" --lang Python
+# $PROJ="_fable_pykg"
+# fable --outDir "${PROJ}" --lang Python

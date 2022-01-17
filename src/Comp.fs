@@ -10,6 +10,9 @@ exception ParseComponentError of string
 exception FromCompinentError of string
 exception ToComponentError of string
 
+type S() =
+    inherit System.Attribute()
+
 type operator =
     | EQ
     | NE
@@ -58,8 +61,7 @@ type 'a lift_array = { elements: 'a ResizeArray }
 let create_lift_array<'a> (x: 'a ResizeArray) = { elements = x }
 
 type 'a commented = Commented of comments : string array * value: 'a
-    with member self.uncomment =
-            let (Commented(_, v)) = self in v
+    with member self.uncomment = let (Commented(_, v)) = self in v
 
 let uncomment (a: _ commented) = a.uncomment
 
@@ -754,4 +756,3 @@ let inline deserialize<'a> (a: string) =
     parse_comp a
     |> objFromComp typeof<'a>
     |> unbox<'a>
-

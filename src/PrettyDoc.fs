@@ -199,4 +199,3 @@ let showDoc (opts) (doc: Doc) =
     sb.ToString()
 
 let genDoc opts (doc: Doc) (write: string -> unit) = render opts (compileToPrims doc) (write)
-
