@@ -1,4 +1,3 @@
-from __future__ import annotations
 from pykg.component import Commented, SpecifierSet, operator, specifier
 from pykg.data_reflection import (
     from_comf,
@@ -151,7 +150,7 @@ class pykg:
                     [
                         python,
                         "-c",
-                        f"import {lock_project.fs_python_package}.{PYKG_MODULES.name}.local.{lock_project.fsexe}",
+                        f"import {lock_project.fs_python_package}.{lock_project.fsexe}",
                     ]
                 )
             else:
@@ -195,9 +194,9 @@ class pykg:
         pykg.__run_from_proj(lock_project)
 
     @staticmethod
-    def new(proj_dir: str, force: bool = False):
+    def new(proj_dir: str, *, force: bool = False):
         path_o_proj_dir = Path(proj_dir)
-        package_name = "fspy/" + path_o_proj_dir.with_suffix(".").name.strip()
+        package_name = "fspy/" + path_o_proj_dir.absolute().with_suffix("").name.strip()
         if path_o_proj_dir.exists():
             path_o_project = path_o_proj_dir / "project.comf"
             if path_o_project.exists():
@@ -205,7 +204,7 @@ class pykg:
                     log.warn(
                         f"there is a fable pykg project in {proj_dir}; add --force to overwrite it."
                     )
-                return
+                    return
         else:
             path_o_proj_dir.mkdir(exist_ok=True, parents=True, mode=0o777)
             path_o_project = path_o_proj_dir / "project.comf"
@@ -219,18 +218,6 @@ class pykg:
             locals=[],
             src=cmt([cmt("src/main.fs"),]),
             deps=[
-                cmt(
-                    Dep(
-                        cmt("lang/python"),
-                        cmt(
-                            SpecifierSet(
-                                frozenset(
-                                    [specifier(operator.COMPACT, Version(3, 8, 0),)]
-                                )
-                            ),
-                        ),
-                    ),
-                ),
                 cmt(
                     Dep(
                         cmt("lang/python"),
@@ -263,10 +250,10 @@ class pykg:
         )
         proj_str = to_comf(new_proj)
 
-        path_o_project.write_text(proj_str, encoding="utf-8")
+        path_o_project.write_text("format v0.1\n" + proj_str, encoding="utf-8")
 
         (path_o_proj_dir / ".gitignore").write_text(
-            (Path(__file__).parent / ".gitignore").read_text(encoding="utf-8"),
+            (Path(__file__).parent / "fspy_ignore.txt").read_text(encoding="utf-8"),
             encoding="utf-8",
         )
 

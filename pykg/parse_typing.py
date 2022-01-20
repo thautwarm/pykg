@@ -27,13 +27,13 @@ def mod_to_expr(mod: ast.Module):
 class TypeEval(ast.NodeTransformer):
     def __init__(self, scope: dict[str, str]):
         self.scope = scope
-    
+
     # XXX: support 'Literal[x] where x : str' ?
     def visit_Constant(self, node: ast.Constant):
         if isinstance(node.value, str):
             return self.visit_Str(node) # type: ignore
         return node
-        
+
     def visit_Str(self, node: ast.Str):
         mod = ast.parse(node.value)
         expr = mod_to_expr(mod)
@@ -46,7 +46,7 @@ class TypeEval(ast.NodeTransformer):
             args=[node],
             keywords=[],
         )
-    
+
     def visit_BinOp(self, node: ast.BinOp):
         if isinstance(node.op, ast.BitOr):
             or_func = ast.Name(id=ReflectOrFuncName, ctx=ast.Load())
@@ -57,14 +57,14 @@ class TypeEval(ast.NodeTransformer):
             )
         raise TypeError(f"a type expression does not allow binary operator {node.op.__class__.__name__}.")
 
-        
+
     def visit_Name(self, node: ast.Name):
         if nid := self.scope.get(node.id):
             assert isinstance(nid, str)
             setattr(node, "id", nid)
-        
+
         reflect_func = ast.Name(id=TypeToReflectFuncName, ctx=ast.Load())
-        
+
         return ast.Call(
             func=reflect_func,
             args=[node],
@@ -109,7 +109,7 @@ def parse_typing(s: str, scope: typing.Dict[str, object], specializer, type_refl
         TypeToReflectFuncName: type_reflect,
         ReflectOrFuncName: reflect_or,
     }
-    
+
     co = compile(expr_, "<pykg_type_eval>", "eval")
     expr = eval(co, scope, local_scope)
     return expr

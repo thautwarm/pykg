@@ -252,7 +252,7 @@ def update_deps_for_project(
             dep_pid = each_spec.uncomment.name.uncomment
             if dep_pid in deps2:
                 log.warn(
-                    f"{pid!r} depends on {dep_pid!r} more than once:\n{to_comf(each_spec)}..."
+                    f"{pid!r} depends on {dep_pid!r} more than once:\n{to_comf(each_spec.uncomment)}..."
                 )
                 continue
             deps2.add(dep_pid)
