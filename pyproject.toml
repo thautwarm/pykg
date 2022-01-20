@@ -4,13 +4,15 @@ authors = [
 ]
 description = "A proposal Fable Python package manager"
 repository = "https://github.com/thautwarm/reflect"
-version = "0.1.0"
-name = "pykg"
+version = "0.1.1"
+name = "pykg-manager"
 
 packages = [
     { include = "pykg" },
     { include = "_tbnf" },
 ]
+
+readme = "README.md"
 
 license = "MIT"
 

@@ -4,6 +4,14 @@ A package manager maintains local/remote dependencies for Fable Python projects.
 
 Write F# and run Python code!
 
+## Installation
+
+```shell
+pip install pykg-manager
+```
+## Usage
+
+
 ```shell
 > pykg new myproj && cd myproj
 # or mkdir myproj && cd myproj && pykg new .
