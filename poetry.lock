@@ -110,7 +110,7 @@ dev = ["pytest (>=4.6.2)", "black (>=19.3b0)"]
 
 [[package]]
 name = "wisepy2"
-version = "1.2"
+version = "1.2.1"
 description = "simple CLI framework"
 category = "main"
 optional = false
@@ -127,7 +127,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8.0"
-content-hash = "f3e9327f068ad574c4699582930f3a6efb280c5e89b13b66bdfdf23c73208681"
+content-hash = "6a024a95da0d4fa6217e9a77dda01ba02afe2cff6382ecd78422be1c53aa7ab5"
 
 [metadata.files]
 certifi = [
@@ -189,7 +189,7 @@ win32-setctime = [
     {file = "win32_setctime-1.0.4.tar.gz", hash = "sha256:2b72b798fdc1d909fb3cc0d25e0be52a42f4848857e3588dd3947c6a18b42609"},
 ]
 wisepy2 = [
-    {file = "wisepy2-1.2-py3-none-any.whl", hash = "sha256:a54e7ead050dfd2c60fc83e3a9ccf8e39244c8efb62747d98bf2e187f098a382"},
+    {file = "wisepy2-1.2.1-py3-none-any.whl", hash = "sha256:446e727ee059318d931b13ca9a98f18754f198c7a24c2098bc4eae7a5685f774"},
 ]
 z3-solver = [
     {file = "z3-solver-4.8.14.0.tar.gz", hash = "sha256:ded46ac020e319c03bb597433f451679294ae7adba0151b170fed0d4d973abbe"},

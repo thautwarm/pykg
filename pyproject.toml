@@ -5,10 +5,11 @@ authors = [
 description = "A proposal Fable Python package manager"
 repository = "https://github.com/thautwarm/reflect"
 version = "0.1.0"
-name = "reflect"
+name = "pykg"
 
 packages = [
-    { include = "reflect" },
+    { include = "pykg" },
+    { include = "_tbnf" },
 ]
 
 license = "MIT"
@@ -20,7 +21,6 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.8.0"
-wisepy2 = "^1.2"
 z3-solver = "^4.8.14"
 loguru = "^0.5.3"
 typing-extensions = "^4.0.1"
@@ -28,3 +28,8 @@ lark = "^0.11.3"
 tomli-w = "^1.0.0"
 diskcache = "^5.4.0"
 dulwich = "^0.20.30"
+wisepy2 = "^1.2.1"
+
+[tool.poetry.scripts]
+pykg = 'pykg.cli_apis:main'
+

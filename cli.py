@@ -1,5 +1,5 @@
 from __future__ import annotations
-from reflect.data_reflection import (
+from pykg.data_reflection import (
     reflect,
     reflect_opt,
     type_reflection,
@@ -7,16 +7,16 @@ from reflect.data_reflection import (
     from_comf,
     to_comf,
 )
-from reflect.component import CNum, CStr, Commented
-from reflect.project import Project, Metadata
-from reflect.fetch_dependencies import (
+from pykg.component import CNum, CStr, Commented
+from pykg.project import Project, Metadata
+from pykg.fetch_dependencies import (
     get_deps_from_metadata,
     DEFAULT_MIRROR,
     get_deps_from_local_project,
 )
-from reflect.builder import FsPyBuilder, LockProject, build_from_lock
+from pykg.fspy_builder import FsPyBuilder, LockProject, build_from_lock
 from pathlib import Path
-from reflect import log
+from pykg import log
 from wisepy2 import wise
 
 

@@ -14,11 +14,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 import typing
 from pprint import pprint
-from reflect.data_reflection import reflect, reflect_opt, type_reflection, get_reflection_opts, from_comf, to_comf
-from reflect.component import CNum, CStr, Commented
-from reflect.project import Project, Metadata
-from reflect.fetch_dependencies import get_deps_from_metadata, DEFAULT_MIRROR
-from reflect.builder import FsPyBuilder
+from pykg.data_reflection import reflect, reflect_opt, type_reflection, get_reflection_opts, from_comf, to_comf
+from pykg.component import CNum, CStr, Commented
+from pykg.project import Project, Metadata
+from pykg.fetch_dependencies import get_deps_from_metadata, DEFAULT_MIRROR
+from pykg.fspy_builder import FsPyBuilder
 
 p_tinfo = type_reflection(Project)
 m_tinfo = type_reflection(Metadata)
