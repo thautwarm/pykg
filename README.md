@@ -9,8 +9,8 @@ Write F# and run Python code!
 ```shell
 pip install pykg-manager
 ```
-## Usage
 
+## Usage
 
 ```shell
 > pykg new myproj && cd myproj

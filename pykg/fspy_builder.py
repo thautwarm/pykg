@@ -101,7 +101,7 @@ class FsPyBuilder:
             )
 
         _, pypkgname = self_name.split("/")
-        python_package = to_valid_identifier(pypkgname)
+        python_package = to_valid_identifier(pypkgname, ignore_dash=True)
         fable_python_package = python_package + "__fable"
 
         lock_proj = LockProject(
